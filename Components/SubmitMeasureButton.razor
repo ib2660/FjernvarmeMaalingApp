@@ -1,0 +1,14 @@
+﻿<button @onclick="HandleSubmit">Bekræft</button>
+
+@code {
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+        {
+            await OnSubmit.InvokeAsync(null);
+        }
+    }
+}

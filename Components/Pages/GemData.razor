@@ -1,0 +1,70 @@
+﻿@page "/registrering-af-forbrug"
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using FjernvarmeMaalingApp.Models
+@using FjernvarmeMaalingApp.Models.Interfaces
+@using FjernvarmeMaalingApp.Services.Factories.Interfaces
+@using FjernvarmeMaalingApp.ViewModels
+@inject GemDataViewModel gemDataViewModel
+
+@if (gemDataViewModel.BrugerOpsætningViewModel.PreferredConsumptionType == null)
+{ 
+    <p>
+        <h2>Vælg forbrugstype</h2>
+    </p>
+    <div>
+        <label for="consumptionType">Forbrugstype:</label>
+        <select id="consumptionType" @bind="gemDataViewModel.SelectedConsumptionTypeName">
+        @foreach (var type in gemDataViewModel.BrugerOpsætningViewModel._consumptionTypeFactories)
+            {
+            var key = type.Key;
+                <option value="@key">@key</option>
+            }
+        </select>
+        <button @onclick="gemDataViewModel.ConsumptionTypeConfirmed">Bekræft</button>
+    </div> 
+}
+@if ((gemDataViewModel.Measurement == null || gemDataViewModel.Measurement.RegistrationStrategy == null) && gemDataViewModel.BrugerOpsætningViewModel.PreferredConsumptionType != null)
+{
+    <p>
+        Forbrugstype valgt: @gemDataViewModel.BrugerOpsætningViewModel.PreferredConsumptionType.ConsumptionTypeName<br />
+        <h2>Vælg registreringsmetode</h2>
+    </p>
+    <div>
+        <label for="registrationMethod">Registreringsmetode:</label>
+        <select id="registrationMethod" @bind="gemDataViewModel.SelectedRegistrationStrategyName">
+            @foreach (var strategy in gemDataViewModel.BrugerOpsætningViewModel._registrationStrategies)
+            {
+                var key = strategy.Key;
+                <option value="@key">@key</option>
+            }
+        </select>
+        <button @onclick="gemDataViewModel.ConfirmStrategy">Bekræft</button>
+    </div>
+}
+
+@if (gemDataViewModel.Measurement != null && gemDataViewModel.Measurement.RegistrationStrategy != null && gemDataViewModel.BrugerOpsætningViewModel.PreferredConsumptionType != null)
+{
+    <p>
+        <h2>
+            Forbrugstype valgt: @gemDataViewModel.BrugerOpsætningViewModel.PreferredConsumptionType.ConsumptionTypeName<br />
+            Registreringsmetode valgt: @gemDataViewModel.Measurement!.RegistrationStrategy!.Name<br />
+        </h2>
+        Hvilken intervallængde dækker din måling : </p>
+    <div>
+        <label for="selectedTimeFrame">Interval:</label>
+        <select id="selectedTimeFrame" @bind="gemDataViewModel.selectedTimeFrame">
+            <option value="Month">Måned</option>
+            <option value="Year">År</option>
+        </select>
+    </div>
+    <button @onclick="gemDataViewModel.ConfirmTimeFrame">Bekræft</button>
+}
+@if (gemDataViewModel.Measurement != null && gemDataViewModel.Measurement!.TimeFrame != null && gemDataViewModel.Measurement.RegistrationStrategy != null && gemDataViewModel.BrugerOpsætningViewModel.PreferredConsumptionType != null)
+{
+    @gemDataViewModel.Measurement.RegistrationStrategy.GetInputComponent(gemDataViewModel)
+}
+
+@code {
+
+}

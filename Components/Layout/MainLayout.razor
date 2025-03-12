@@ -1,0 +1,52 @@
+﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using FjernvarmeMaalingApp.Models
+@using FjernvarmeMaalingApp.ViewModels
+@inject LoginViewModel ViewModel
+@inject IConfiguration Configuration
+
+<PageTitle>@($"{Configuration["CustomerName"]}'s Fjernvarme app")</PageTitle>
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4 d-flex justify-content-between">
+            <div class="left-text">
+                @if (ViewModel.CurrentUser != null && ViewModel.CurrentUser.Identity!.IsAuthenticated)
+                {
+                    <p>
+                        @(ViewModel.CurrentUser.Claims.ToList()[0].Value.ToString()) er logget ind.
+                    </p>
+                }
+            </div>
+            <div class="right-text">
+                @if (ViewModel.CurrentUser != null && ViewModel.CurrentUser.Identity!.IsAuthenticated)
+                {
+                    <p>
+                        <button type="submit" class="btn btn-primary" @onclick="ViewModel.LogOutAsync">Log ud</button>
+                    </p>
+                }
+            </div>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.InitializeAsync();
+    }
+}

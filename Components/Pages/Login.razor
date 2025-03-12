@@ -1,0 +1,47 @@
+﻿@page "/log-ind"
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using FjernvarmeMaalingApp.Models
+@using FjernvarmeMaalingApp.ViewModels
+@inject LoginViewModel ViewModel
+@inject IConfiguration Configuration
+
+<PageTitle>@($"Log ind på {Configuration["CustomerName"]}'s Fjernvarme app")</PageTitle>
+
+@if (ViewModel.CurrentUser != null && ViewModel.CurrentUser.Identity!.IsAuthenticated) { }
+else
+{
+    <h3>Login</h3>
+    <EditForm Model="@ViewModel.LoginModel" OnValidSubmit="ViewModel.HandleLoginAsync">
+        <DataAnnotationsValidator />
+        <div class="form-group">
+            <label for="username">Brugernavn:</label>
+            <InputText id="username" @bind-Value="ViewModel.LoginModel.Username" class="form-control" placeholder="Brugernavn" />
+            <ValidationMessage For="@(() => ViewModel.LoginModel.Username)" />
+        </div>
+
+        <div class="form-group">
+            <label for="password">Adgangskode:</label>
+            <InputText id="password" @bind-Value="ViewModel.LoginModel.Password" class="form-control" type="password" placeholder="Adgangskode" />
+            <ValidationMessage For="@(() => ViewModel.LoginModel.Password)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Log ind</button>
+        @if (ViewModel.LoginModel.Response != null)
+        {
+            <p>@ViewModel.LoginModel.Response</p>
+        }
+    </EditForm>
+}
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.InitializeAsync();
+        ViewModel.StateChanged += StateHasChanged;
+    }
+    public void Dispose()
+    {
+        ViewModel.StateChanged -= StateHasChanged;
+    }
+}

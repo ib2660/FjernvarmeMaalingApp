@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35806.99
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FjernvarmeMaalingApp", "FjernvarmeMaalingApp.csproj", "{FCD93FC9-BA62-45FF-BBB7-8857346E6377}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FjernvarmemaalingApp.Tests", "..\FjernvarmemaalingApp.Tests\FjernvarmemaalingApp.Tests.csproj", "{2B153FD6-EAFB-4D89-B737-3732FD80D634}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FCD93FC9-BA62-45FF-BBB7-8857346E6377}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCD93FC9-BA62-45FF-BBB7-8857346E6377}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCD93FC9-BA62-45FF-BBB7-8857346E6377}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCD93FC9-BA62-45FF-BBB7-8857346E6377}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B153FD6-EAFB-4D89-B737-3732FD80D634}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B153FD6-EAFB-4D89-B737-3732FD80D634}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B153FD6-EAFB-4D89-B737-3732FD80D634}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B153FD6-EAFB-4D89-B737-3732FD80D634}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {50D58024-6A3F-49C7-9D9E-15C3DE0C3C97}
+	EndGlobalSection
+EndGlobal

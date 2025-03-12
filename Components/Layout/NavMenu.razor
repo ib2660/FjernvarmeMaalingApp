@@ -1,0 +1,73 @@
+﻿@using FjernvarmeMaalingApp.ViewModels
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject LoginViewModel ViewModel
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Fjernvarme målinger</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        @if (ViewModel.CurrentUser == null || !ViewModel.CurrentUser.Identity!.IsAuthenticated)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="log-ind">
+                    <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> Login
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="opretbruger">
+                    <span class="bi bi-person-plus" aria-hidden="true"></span> Opret bruger
+                </NavLink>
+            </div>
+        }
+        else if (ViewModel.CurrentUser.Identity!.IsAuthenticated)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="registrering-af-forbrug">
+                    <span class="bi bi-pencil-square" aria-hidden="true"></span> Registrering af forbrug
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="aflaesning-af-forbrugsdata">
+                    <span class="bi bi-bar-chart-line" aria-hidden="true"></span> Aflæsning af forbrugsdata
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="brugeropsaetning">
+                    <span class="bi bi-gear" aria-hidden="true"></span> Brugeropsætning
+                </NavLink>
+            </div>
+        }
+    </nav>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+        await ViewModel.InitializeAsync();
+    }
+
+    private async void OnAuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        var authState = await task;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        AuthenticationStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+    }
+}

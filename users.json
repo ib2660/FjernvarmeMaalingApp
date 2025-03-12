@@ -1,0 +1,9 @@
+[
+  {
+    "id": 0,
+    "username": "Hans",
+    "passwordHash": "\u002ByjA5tpZ2zIY/laMTEFVC/oTWDg=",
+    "salt": "wPFPQfJkgmM3wbYjAFmY8Q==",
+    "preferredConsumptionTypeName": "Gasforbrug i m3"
+  }
+]

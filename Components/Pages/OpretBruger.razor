@@ -1,0 +1,35 @@
+﻿@page "/opretbruger"
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using FjernvarmeMaalingApp.Models
+@using FjernvarmeMaalingApp.ViewModels
+@inject OpretBrugerViewModel ViewModel
+@inject IConfiguration Configuration
+
+
+<PageTitle>@($"Opret bruger på {Configuration["CustomerName"]}'s Fjernvarme app")</PageTitle>
+<h3>Opret Bruger</h3>
+
+<EditForm Model="@ViewModel.RegisterModel" OnValidSubmit="ViewModel.HandleRegister">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <label for="newUsername">Brugernavn:</label>
+        <InputText id="newUsername" @bind-Value="ViewModel.RegisterModel.Username" class="form-control" placeholder="Brugernavn" @oninput="ViewModel.AdjustComment" />
+        <ValidationMessage For="@(() => ViewModel.RegisterModel.Username)" />
+    </div>
+
+    <div class="form-group">
+        <label for="newPassword">Adgangskode:</label>
+        <InputText id="newPassword" @bind-Value="ViewModel.RegisterModel.Password" class="form-control" type="password" placeholder="Adgangskode" />
+        <ValidationMessage For="@(() => ViewModel.RegisterModel.Password)" />
+    </div>
+    <button type="submit" class="btn btn-secondary">Opret Bruger</button>
+    @if (ViewModel.RegisterModel.Response != null)
+    {
+        <p>@ViewModel.RegisterModel.Response</p>
+    }
+</EditForm>
+
+@code {
+
+}
