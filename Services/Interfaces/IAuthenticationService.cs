@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace FjernvarmeMaalingApp.Services.ServiceInterfaces;
+namespace FjernvarmeMaalingApp.Services.Interfaces;
 public interface IAuthenticationService
 {
     Task<bool> ValidateLoginAsync(string username, string password);

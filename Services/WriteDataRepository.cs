@@ -1,4 +1,4 @@
-using FjernvarmeMaalingApp.Services.ServiceInterfaces;
+using FjernvarmeMaalingApp.Services.Interfaces;
 using FjernvarmeMaalingApp.ViewModels;
 using System.Text.Json;
 
@@ -19,8 +19,7 @@ public class WriteDataRepository(ILogger<WriteDataRepository> logger, LoginViewM
 
         try
         {
-            // Implement method to add data to a file - for demonstration purposes
-            File.AppendAllText("data.json", updatedJson + Environment.NewLine);
+            File.AppendAllText("data.json", updatedJson + Environment.NewLine); // demonstration af gemning af data i et repository som kan skiftes ud med en database, en cloud storage service eller andet.
             return true;
         }
         catch (Exception ex)

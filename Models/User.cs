@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 using FjernvarmeMaalingApp.Models.Interfaces;
-using FjernvarmeMaalingApp.Services.ServiceInterfaces;
+using FjernvarmeMaalingApp.Services.Interfaces;
 
 namespace FjernvarmeMaalingApp.Models;
 
@@ -17,23 +17,30 @@ public class User
     public required string Salt { get; set; }
     [JsonPropertyName("preferredConsumptionTypeName")]
     public string PreferredConsumptionTypeName { get; private set; }
+    [JsonPropertyName("preferredRegistrationStrategyName")]
+    public string PreferredRegistrationStrategyName { get; private set; }
     [JsonIgnore]
     public IConsumptionType? PreferredConsumptionType { get; set; }
+    [JsonIgnore]
+    public IRegistrationStrategy? PreferredRegistrationStrategy { get; set; }
+    [JsonIgnore]
+    private ILogger<User> Logger { get; set; }
 
-    private User() { }
+    public User() { } // TODO: sæt til private efter test
 
-    // Constructor for deserialization
+    // Constructor til at deserialize fra JSON
     [JsonConstructor]
-    public User(int id, string username, string passwordHash, string salt, string preferredConsumptionTypeName)
+    public User(int id, string username, string passwordHash, string salt, string preferredConsumptionTypeName, string preferredRegistrationStrategyName)
     {
         Id = id;
         Username = username;
         PasswordHash = passwordHash;
         Salt = salt;
         PreferredConsumptionTypeName = preferredConsumptionTypeName;
+        PreferredRegistrationStrategyName = preferredRegistrationStrategyName;
     }
 
-    public static async Task<bool> CreateUserAsync(string username, string password, IUserRepository UserRepository)
+    public static async Task<bool> CreateUserAsync(string username, string password, IUserRepository UserRepository, ILogger<User> logger)
     {
         var salt = GenerateSalt();
         var passwordHash = HashPassword(password, salt);
@@ -41,11 +48,22 @@ public class User
         {
             Username = username,
             PasswordHash = passwordHash,
-            Salt = salt
+            Salt = salt,
+            Logger = logger
         };
-        var result = await UserRepository.AddUserAsync(user);
-        Console.WriteLine(result);
-        return result;
+        if (await UserRepository.AddOrUpdateUserAsync(user))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public static void UpdatePassword(string newPassword, User user)
+    {
+        var salt = GenerateSalt();
+        user.PasswordHash = HashPassword(newPassword, salt);
+        user.Salt = salt;
+        user.Logger.LogInformation($"User {user.Username} updated password.");
     }
 
     public static string CheckPassword(string password, string userSalt)

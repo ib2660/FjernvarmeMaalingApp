@@ -1,4 +1,4 @@
-﻿namespace FjernvarmeMaalingApp.Services.ServiceInterfaces;
+﻿namespace FjernvarmeMaalingApp.Services.Interfaces;
 
 public interface IWriteDataRepository
 {

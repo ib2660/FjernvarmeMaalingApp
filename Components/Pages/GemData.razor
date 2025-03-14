@@ -15,13 +15,13 @@
     <div>
         <label for="consumptionType">Forbrugstype:</label>
         <select id="consumptionType" @bind="gemDataViewModel.SelectedConsumptionTypeName">
-        @foreach (var type in gemDataViewModel.BrugerOpsætningViewModel._consumptionTypeFactories)
+            @foreach (var type in gemDataViewModel.BrugerOpsætningViewModel.ConsumptionTypeFactories)
             {
-            var key = type.Key;
+                var key = type.Key;
                 <option value="@key">@key</option>
             }
         </select>
-        <button @onclick="gemDataViewModel.ConsumptionTypeConfirmed">Bekræft</button>
+        <button @onclick="async () => await gemDataViewModel.ConsumptionTypeConfirmedAsync()">Bekræft</button>
     </div> 
 }
 @if ((gemDataViewModel.Measurement == null || gemDataViewModel.Measurement.RegistrationStrategy == null) && gemDataViewModel.BrugerOpsætningViewModel.PreferredConsumptionType != null)
@@ -33,7 +33,7 @@
     <div>
         <label for="registrationMethod">Registreringsmetode:</label>
         <select id="registrationMethod" @bind="gemDataViewModel.SelectedRegistrationStrategyName">
-            @foreach (var strategy in gemDataViewModel.BrugerOpsætningViewModel._registrationStrategies)
+            @foreach (var strategy in gemDataViewModel.BrugerOpsætningViewModel.RegistrationStrategies)
             {
                 var key = strategy.Key;
                 <option value="@key">@key</option>
@@ -54,17 +54,32 @@
     <div>
         <label for="selectedTimeFrame">Interval:</label>
         <select id="selectedTimeFrame" @bind="gemDataViewModel.selectedTimeFrame">
-            <option value="Month">Måned</option>
-            <option value="Year">År</option>
+            <option value="Månedlig aflæsning">Månedlig aflæsning</option>
+            <option value="Årlig aflæsning">Årlig aflæsning</option>
         </select>
     </div>
     <button @onclick="gemDataViewModel.ConfirmTimeFrame">Bekræft</button>
 }
-@if (gemDataViewModel.Measurement != null && gemDataViewModel.Measurement!.TimeFrame != null && gemDataViewModel.Measurement.RegistrationStrategy != null && gemDataViewModel.BrugerOpsætningViewModel.PreferredConsumptionType != null)
+@if (gemDataViewModel.Measurement!.MeasurementDate == null && gemDataViewModel.Measurement!.TimeFrameStrategy != null && gemDataViewModel.Measurement.RegistrationStrategy != null && gemDataViewModel.BrugerOpsætningViewModel.PreferredConsumptionType != null)
+{
+    <p>
+        <h2>
+            Forbrugstype valgt: @gemDataViewModel.BrugerOpsætningViewModel.PreferredConsumptionType.ConsumptionTypeName<br />
+            Registreringsmetode valgt: @gemDataViewModel.Measurement!.RegistrationStrategy!.Name<br />
+            Interval valgt: @gemDataViewModel.Measurement!.TimeFrameStrategy!.Name<br />
+        </h2>
+    </p>
+    <div>
+        <label for="input">Indtast dato for måling:</label>
+        <input id="input" type="date" @bind="gemDataViewModel.Measurement!.MeasurementDate" />
+    </div>
+    <button @onclick="gemDataViewModel.ConfirmMeasurementDate">Bekræft</button>
+}
+@if (gemDataViewModel.Measurement != null && gemDataViewModel.Measurement!.MeasurementDate != null && gemDataViewModel.Measurement!.TimeFrameStrategy != null && gemDataViewModel.Measurement.RegistrationStrategy != null && gemDataViewModel.BrugerOpsætningViewModel.PreferredConsumptionType != null)
 {
     @gemDataViewModel.Measurement.RegistrationStrategy.GetInputComponent(gemDataViewModel)
 }
 
 @code {
-
+    protected override void OnInitialized() => gemDataViewModel.OnStateChange = StateHasChanged;
 }

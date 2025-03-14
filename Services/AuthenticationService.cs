@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 using FjernvarmeMaalingApp.Models;
-using FjernvarmeMaalingApp.Services.ServiceInterfaces;
+using FjernvarmeMaalingApp.Services.Interfaces;
 
 namespace FjernvarmeMaalingApp.Services;
 

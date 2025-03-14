@@ -1,11 +1,85 @@
-﻿@using FjernvarmeMaalingApp.ViewModels
-@page "/brugeropsaetning"
+﻿@page "/brugeropsaetning"  
+@inject FjernvarmeMaalingApp.ViewModels.BrugerOpsætningViewModel ViewModel  
 
+<h3>Brugeropsætning</h3>  
 
-@code {
-    // Brugeren skal kunne justere de data, som er registreret til brugeren
-    // Brugeren skal kunne ændre adgangskode
-    // Brugeren skal kunne vælge en foretrukken forbrugstype. Fx Gas, olie eller MWh
-    // Brugeren skal kunne vælge en foretrukken registreringsstrategi. Fx Måleraflæsning eller Indtastning af tal
-    // Brugeren skal kunne vælge en foretrukken tidsperiode. Fx Måned eller År
+@if (ViewModel.CurrentUser == null)  
+{  
+   <p>Loading...</p>  
+}  
+else  
+{  
+   <div>  
+       <h4>Opdater Adgangskode</h4>  
+       <EditForm Model="ViewModel" OnValidSubmit="UpdatePassword">  
+           <DataAnnotationsValidator />  
+           <ValidationSummary />  
+
+           <div class="form-group">  
+               <label for="newPassword">Ny Adgangskode:</label>  
+               <InputText id="newPassword" @bind-Value="ViewModel.NewPassword" class="form-control" />  
+           </div>  
+           <div class="form-group">  
+               <label for="confirmPassword">Bekræft Adgangskode:</label>  
+               <InputText id="confirmPassword" @bind-Value="ViewModel.ConfirmPassword" class="form-control" />  
+           </div>  
+           <button type="submit" class="btn btn-primary">Opdater Adgangskode</button>  
+       </EditForm>  
+       <p>@ViewModel.ResponseMessage</p>  
+   </div>  
+
+   <div>  
+       <h4>Opdater Brugeroplysninger</h4>  
+       <EditForm Model="ViewModel" OnValidSubmit="UpdateUserDetails">  
+           <DataAnnotationsValidator />  
+           <ValidationSummary />  
+
+           <div class="form-group">  
+               <label for="consumptionType">Foretrukken Forbrugstype:</label>  
+               <InputSelect id="consumptionType" @bind-Value="ViewModel.SelectedConsumptionType" class="form-control">  
+                   @foreach (var consumptionType in ViewModel.ConsumptionTypeFactories.Keys)  
+                   {  
+                       <option value="@consumptionType">@consumptionType</option>  
+                   }  
+               </InputSelect>  
+           </div>  
+           <div class="form-group">  
+               <label for="registrationStrategy">Foretrukken Registreringsstrategi:</label>  
+               <InputSelect id="registrationStrategy" @bind-Value="ViewModel.SelectedRegistrationStrategy" class="form-control">  
+                   @foreach (var registrationStrategy in ViewModel.RegistrationStrategies.Keys)  
+                   {  
+                       <option value="@registrationStrategy">@registrationStrategy</option>  
+                   }  
+               </InputSelect>  
+           </div>  
+           <button type="submit" class="btn btn-primary">Opdater Brugeroplysninger</button>  
+       </EditForm>  
+       <p>@ViewModel.ResponseMessage</p>  
+   </div>  
+}  
+
+@code {  
+   protected override async Task OnInitializedAsync()  
+   {  
+       await ViewModel.InitializeAsync();  
+       if (ViewModel.CurrentUser != null)  
+       {  
+           ViewModel.SelectedConsumptionType = ViewModel.CurrentUser.PreferredConsumptionType?.ConsumptionTypeName ?? string.Empty;  
+           ViewModel.SelectedRegistrationStrategy = ViewModel.CurrentUser.PreferredRegistrationStrategy?.Name ?? string.Empty;  
+       }  
+   }  
+
+   private async Task UpdatePassword()  
+   {  
+       await ViewModel.UpdateUserPasswordAsync();  
+   }  
+
+   private async Task UpdateUserDetails()  
+   {  
+       var success = await ViewModel.UpdateUserDetails();  
+       if (success)  
+       {  
+           ViewModel.ResponseMessage = "Bruger opdateret";  
+       }  
+   }  
 }

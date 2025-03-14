@@ -1,9 +1,9 @@
 ﻿using FjernvarmeMaalingApp.Models;
 
-namespace FjernvarmeMaalingApp.Services.ServiceInterfaces;
+namespace FjernvarmeMaalingApp.Services.Interfaces;
 
 public interface IUserRepository
 {
     Task<User?> GetUserAsync(string username);
-    Task<bool> AddUserAsync(User user);
+    Task<bool> AddOrUpdateUserAsync(User user);
 }

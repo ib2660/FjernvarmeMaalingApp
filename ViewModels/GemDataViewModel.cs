@@ -1,33 +1,37 @@
 ﻿using FjernvarmeMaalingApp.Models;
-using FjernvarmeMaalingApp.Services.ServiceInterfaces;
+using FjernvarmeMaalingApp.Services.Interfaces;
 using System.Text.Json;
 
 namespace FjernvarmeMaalingApp.ViewModels;
 
 public class GemDataViewModel(ILogger<GemDataViewModel> logger, BrugerOpsætningViewModel brugerOpsætningViewModel, IWriteDataRepository writeDataRepository, JsonSerializerOptions jsonSerializerOptions)
 {
-    private readonly ILogger<GemDataViewModel> Logger = logger;
-    private readonly IWriteDataRepository WriteDataRepository = writeDataRepository;
-    private readonly JsonSerializerOptions JsonSerializerOptions = jsonSerializerOptions;
-    public Measurement? Measurement { get; set; } = new();
-    public string selectedTimeFrame = "Month";
+    private readonly ILogger<GemDataViewModel> _logger = logger;
+    private readonly IWriteDataRepository _writeDataRepository = writeDataRepository;
+    private readonly JsonSerializerOptions _jsonSerializerOptions = jsonSerializerOptions;
+    public readonly BrugerOpsætningViewModel BrugerOpsætningViewModel = brugerOpsætningViewModel;
+    public Measurement? Measurement { get; set; }
+    public Action? OnStateChange { get; set; }
+    public string selectedTimeFrame = "Månedlig aflæsning";
     public string SelectedConsumptionTypeName { get; set; } = string.Empty;
     public string SelectedRegistrationStrategyName { get; set; } = string.Empty;
-    public readonly BrugerOpsætningViewModel BrugerOpsætningViewModel = brugerOpsætningViewModel;
+    
 
-    public void ConsumptionTypeConfirmed()
+    public async Task ConsumptionTypeConfirmedAsync()
     {
         if (SelectedConsumptionTypeName != string.Empty)
         {
-            BrugerOpsætningViewModel.SetPreferredConsumptionType(BrugerOpsætningViewModel._consumptionTypeFactories[SelectedConsumptionTypeName].CreateConsumptionType());
+            BrugerOpsætningViewModel.SelectedConsumptionType = SelectedConsumptionTypeName;
+            await BrugerOpsætningViewModel.UpdateUserDetails();
             Measurement = new Measurement
             {
                 ConsumptionType = BrugerOpsætningViewModel.PreferredConsumptionType
             };
+            OnStateChange?.Invoke();
         }
         else
         {
-            Logger.LogError("No consumption type selected for instanciation of type Measurement");
+            _logger.LogError("No consumption type selected for instanciation of type Measurement");
         }
     }
 
@@ -35,12 +39,13 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, BrugerOpsætning
     {
         if (SelectedRegistrationStrategyName != string.Empty)
         {
-            var selectedStrategy = BrugerOpsætningViewModel._registrationStrategies[SelectedRegistrationStrategyName];
-            Measurement!.SetConsumptionStrategy(selectedStrategy);
+            var selectedStrategy = BrugerOpsætningViewModel.RegistrationStrategies[SelectedRegistrationStrategyName];
+            Measurement!.SetRegistrationStrategy(selectedStrategy);
+            OnStateChange?.Invoke();
         }
         else
         {
-            Logger.LogError("No strategy selected for Measurement instance");
+            _logger.LogError("No strategy selected for Measurement instance");
         }
     }
 
@@ -48,11 +53,28 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, BrugerOpsætning
     {
         if (Measurement != null)
         {
-            Measurement.TimeFrame = selectedTimeFrame == "Month" ? TimeSpan.FromDays(30) : TimeSpan.FromDays(365);
+            Measurement.SetTimeFrameStrategy(selectedTimeFrame);
+            OnStateChange?.Invoke();
         }
         else
         {
-            Logger.LogError("Measurement is null");
+            _logger.LogError("Measurement is null");
+        }
+    }
+    public void ConfirmMeasurementDate()
+    {
+        if (Measurement != null)
+        {
+            if (Measurement.MeasurementDate == null)
+            {
+                _logger.LogError("Measurement date is null");
+            }
+            _logger.LogInformation($"Measurement date set to {Measurement.MeasurementDate}");
+            OnStateChange?.Invoke();
+        }
+        else
+        {
+            _logger.LogError("Measurement is null");
         }
     }
 
@@ -60,26 +82,29 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, BrugerOpsætning
     {
         if (Measurement != null)
         {
+            Measurement.ExecuteRegistrationStrategy();
             if (Measurement.Validate(out var validationResults))
             {
                 var json = JsonSerializer.Serialize(Measurement);
-                var success = WriteDataRepository.EnterData(json);
+                var success = _writeDataRepository.EnterData(json);
                 if (!success)
                 {
-                    Logger.LogError("Failed to send measurement data");
+                    _logger.LogError("Failed to send measurement data");
                 }
             }
             else
             {
                 foreach (var validationResult in validationResults)
                 {
-                    Logger.LogError(validationResult.ErrorMessage);
+                    _logger.LogError(validationResult.ErrorMessage);
                 }
             }
         }
         else
         {
-            Logger.LogError("Measurement is null");
+            _logger.LogError("Measurement is null");
         }
+        Measurement = new Measurement();
+        OnStateChange?.Invoke();
     }
 }

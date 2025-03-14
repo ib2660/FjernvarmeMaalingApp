@@ -1,11 +1,20 @@
-﻿using FjernvarmeMaalingApp.Services.ServiceInterfaces;
+﻿using FjernvarmeMaalingApp.Models;
+using FjernvarmeMaalingApp.Services.Interfaces;
 
 namespace FjernvarmeMaalingApp.Services;
 
 public class ReadDataRepository : IReadDataRepository
 {
-    public string ReadData()
+    public async Task<string> ReadData(User user)
     {
-        throw new NotImplementedException(); //Implement strategies to handle concurrency issues, such as optimistic concurrency control, especially for write operations.
+        if (user == null)
+        {
+            return string.Empty;
+        }
+
+        // Read data from the file. Make sure only data from the user is read.
+        string json = "Data read successfully.";
+
+        return json;
     }
 }
