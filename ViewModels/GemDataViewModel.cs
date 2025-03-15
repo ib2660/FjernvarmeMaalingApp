@@ -16,7 +16,6 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, BrugerOpsætning
     public string SelectedConsumptionTypeName { get; set; } = string.Empty;
     public string SelectedRegistrationStrategyName { get; set; } = string.Empty;
     
-
     public async Task ConsumptionTypeConfirmedAsync()
     {
         if (SelectedConsumptionTypeName != string.Empty)
@@ -27,7 +26,7 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, BrugerOpsætning
             {
                 ConsumptionType = BrugerOpsætningViewModel.PreferredConsumptionType
             };
-            OnStateChange?.Invoke();
+            // OnStateChange?.Invoke();
         }
         else
         {
@@ -35,7 +34,7 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, BrugerOpsætning
         }
     }
 
-    public void ConfirmStrategy()
+    public void ConfirmRegistrationStrategy()
     {
         if (SelectedRegistrationStrategyName != string.Empty)
         {
@@ -49,7 +48,7 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, BrugerOpsætning
         }
     }
 
-    public void ConfirmTimeFrame()
+    public void ConfirmTimeFrameStrategy()
     {
         if (Measurement != null)
         {

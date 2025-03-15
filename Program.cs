@@ -37,7 +37,7 @@ builder.Services.AddTransient<IMeasurementDisplayStrategy, FullDisplayStrategy>(
 builder.Services.AddTransient<IMeasurementDisplayStrategy, ListMonthsDisplayStrategy>();
 builder.Services.AddTransient<IMeasurementDisplayStrategy, OneMonthDisplayStrategy>();
 builder.Services.AddTransient<IMeasurementDisplayStrategy, SameMonthAllYearsDisplayStrategy>();
-// Tilføj sacoped singletons af ViewModels.
+// Tilføj scoped singletons af ViewModels.
 builder.Services.AddScoped<LoginViewModel>();
 builder.Services.AddScoped<OpretBrugerViewModel>();
 builder.Services.AddScoped<AflæsDataViewModel>();

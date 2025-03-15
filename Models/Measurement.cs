@@ -25,13 +25,6 @@ public class Measurement
     public IRegistrationStrategy? RegistrationStrategy { get; set; }
     public ITimeFrameStrategy? TimeFrameStrategy { get; set; }
     private IEnumerable<ITimeFrameStrategy> _timeFrameStrategies;
-    public Measurement()
-    {
-    }
-    public Measurement(IEnumerable<ITimeFrameStrategy> timeFrameStrategies)
-    {
-        _timeFrameStrategies = timeFrameStrategies;
-    }
     public void SetRegistrationStrategy(IRegistrationStrategy strategy)
     {
         RegistrationStrategy = strategy;

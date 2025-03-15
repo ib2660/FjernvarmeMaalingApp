@@ -34,9 +34,9 @@ public class IntegerRegistrationStrategy(ILogger<IntegerRegistrationStrategy> lo
             builder.AddAttribute(5, "value", gemDataViewModel.Measurement!.Consumption);
             builder.AddAttribute(6, "oninput", EventCallback.Factory.CreateBinder<double?>(this, value => gemDataViewModel.Measurement.Consumption = value, gemDataViewModel.Measurement.Consumption));
             builder.CloseElement();
-            builder.OpenComponent<SubmitMeasureButton>(7);
-            builder.AddAttribute(8, "OnSubmit", EventCallback.Factory.Create(this, () => OnSubmit(gemDataViewModel)));
-            builder.CloseComponent();
+            //builder.OpenComponent<SubmitMeasureButton>(7);
+            //builder.AddAttribute(8, "OnSubmit", EventCallback.Factory.Create(this, () => OnSubmit(gemDataViewModel)));
+            //builder.CloseComponent();
             builder.CloseElement();
         };
     }
