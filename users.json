@@ -1,9 +1,11 @@
 [
   {
-    "id": 0,
-    "username": "Hans",
-    "passwordHash": "\u002ByjA5tpZ2zIY/laMTEFVC/oTWDg=",
-    "salt": "wPFPQfJkgmM3wbYjAFmY8Q==",
-    "preferredConsumptionTypeName": "Gasforbrug i m3"
+    "Id": 0,
+    "Username": "Ib",
+    "PasswordHash": "2RMF5PhcnADL1Mt0Tr0EgW3/mFc=",
+    "Salt": "ul8tJ6G57HlCH6JWIfMB\u002BQ==",
+    "Preferred Consumption Type Name": "Olieforbrug i liter",
+    "Preferred Registration Strategy Name": "Faktisk forbrug",
+    "Preferred Time Frame": "\u00C5rlig afl\u00E6sning"
   }
 ]

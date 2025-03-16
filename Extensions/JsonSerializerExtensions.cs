@@ -10,7 +10,7 @@ public static class JsonSerializerExtensions
 {
     public static IServiceCollection AddCustomJsonOptions(this IServiceCollection services)
     {
-        services.AddSingleton<JsonSerializerOptions>(provider =>
+        services.AddScoped<JsonSerializerOptions>(provider =>
         {
             var factories = provider.GetServices<IConsumptionTypeFactory>();
             var jsonOptions = new JsonSerializerOptions

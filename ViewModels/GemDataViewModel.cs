@@ -1,94 +1,121 @@
 ﻿using FjernvarmeMaalingApp.Models;
+using FjernvarmeMaalingApp.Models.Interfaces;
+using FjernvarmeMaalingApp.Services;
 using FjernvarmeMaalingApp.Services.Interfaces;
+using Microsoft.AspNetCore.Components;
+using System.Runtime.ExceptionServices;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace FjernvarmeMaalingApp.ViewModels;
 
-public class GemDataViewModel(ILogger<GemDataViewModel> logger, BrugerOpsætningViewModel brugerOpsætningViewModel, IWriteDataRepository writeDataRepository, JsonSerializerOptions jsonSerializerOptions)
+public class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRepository userRepository, IAuthenticationService authService, IServicesRegistry servicesRegistry, IWriteDataRepository writeDataRepository)
 {
     private readonly ILogger<GemDataViewModel> _logger = logger;
     private readonly IWriteDataRepository _writeDataRepository = writeDataRepository;
-    private readonly JsonSerializerOptions _jsonSerializerOptions = jsonSerializerOptions;
-    public readonly BrugerOpsætningViewModel BrugerOpsætningViewModel = brugerOpsætningViewModel;
-    public Measurement? Measurement { get; set; }
+    private readonly IServicesRegistry _servicesRegistry = servicesRegistry;
+    private readonly IAuthenticationService _authService = authService;
+    private readonly IUserRepository _userRepository = userRepository;
+    public Measurement? Measurement { get; set; } = new Measurement();
     public Action? OnStateChange { get; set; }
-    public string selectedTimeFrame = "Månedlig aflæsning";
-    public string SelectedConsumptionTypeName { get; set; } = string.Empty;
-    public string SelectedRegistrationStrategyName { get; set; } = string.Empty;
-    
-    public async Task ConsumptionTypeConfirmedAsync()
+    public string selectedTimeFrameName = string.Empty;
+    public string selectedConsumptionTypeName = string.Empty;
+    private string _selectedRegistrationStrategyName = string.Empty;
+    public string SelectedRegistrationStrategyName
     {
-        if (SelectedConsumptionTypeName != string.Empty)
+        get => _selectedRegistrationStrategyName;
+        set
         {
-            BrugerOpsætningViewModel.SelectedConsumptionType = SelectedConsumptionTypeName;
-            await BrugerOpsætningViewModel.UpdateUserDetails();
-            Measurement = new Measurement
+            if (_selectedRegistrationStrategyName != value)
             {
-                ConsumptionType = BrugerOpsætningViewModel.PreferredConsumptionType
-            };
-            // OnStateChange?.Invoke();
-        }
-        else
-        {
-            _logger.LogError("No consumption type selected for instanciation of type Measurement");
-        }
-    }
-
-    public void ConfirmRegistrationStrategy()
-    {
-        if (SelectedRegistrationStrategyName != string.Empty)
-        {
-            var selectedStrategy = BrugerOpsætningViewModel.RegistrationStrategies[SelectedRegistrationStrategyName];
-            Measurement!.SetRegistrationStrategy(selectedStrategy);
-            OnStateChange?.Invoke();
-        }
-        else
-        {
-            _logger.LogError("No strategy selected for Measurement instance");
-        }
-    }
-
-    public void ConfirmTimeFrameStrategy()
-    {
-        if (Measurement != null)
-        {
-            Measurement.SetTimeFrameStrategy(selectedTimeFrame);
-            OnStateChange?.Invoke();
-        }
-        else
-        {
-            _logger.LogError("Measurement is null");
-        }
-    }
-    public void ConfirmMeasurementDate()
-    {
-        if (Measurement != null)
-        {
-            if (Measurement.MeasurementDate == null)
-            {
-                _logger.LogError("Measurement date is null");
+                _selectedRegistrationStrategyName = value;
+                OnStateChange?.Invoke();
             }
-            _logger.LogInformation($"Measurement date set to {Measurement.MeasurementDate}");
-            OnStateChange?.Invoke();
+        }
+    }
+    public User? CurrentUser {get; private set; }
+    public async Task InitializeAsync()
+    {
+        await SetCurrentUser();
+        if (CurrentUser != null)
+        {
+            selectedTimeFrameName = CurrentUser.PreferredTimeFrameStrategyName;
+            selectedConsumptionTypeName = CurrentUser.PreferredConsumptionTypeName;
+            _selectedRegistrationStrategyName = CurrentUser.PreferredRegistrationStrategyName;          
         }
         else
         {
-            _logger.LogError("Measurement is null");
+            _logger.LogError("CurrentUser is null. Settings not updated.");
+        }
+    }
+    public List<string> GetConsumptionTypeNames()
+    {
+        return _servicesRegistry.GetAllConsumptionTypeFactories().Select(f => f.Name).ToList();
+    }
+    public List<string> GetRegistrationStrategyNames()
+    {
+        return _servicesRegistry.GetAllRegistrationStrategies().Select(s => s.Name).ToList();
+    }
+    public IRegistrationStrategy GetRegistrationStrategy(string name)
+    {
+        return _servicesRegistry.GetRegistrationStrategy(name)!;
+    }
+    public List<string> GetTimeFrameStrategyNames()
+    {
+        // _logger.LogInformation("GetTimeFrameStrategyNames called");
+        return _servicesRegistry.GetAllTimeFrameStrategies().Select(s => s.Name).ToList();
+    }
+
+    private void ExecuteRegistrationStrategy()
+    {
+        if (_selectedRegistrationStrategyName != string.Empty)
+        {
+            _servicesRegistry.GetRegistrationStrategy(_selectedRegistrationStrategyName)!.Execute(Measurement!);
+        }
+        else
+        {
+            _logger.LogError("RegistrationStrategy is null");
         }
     }
 
-    public void SendMeasurementData()
+    private void ExecuteTimeFrameStrategy()
     {
-        if (Measurement != null)
+        if (selectedTimeFrameName != string.Empty)
         {
-            Measurement.ExecuteRegistrationStrategy();
+            _servicesRegistry.GetTimeFrameStrategy(selectedTimeFrameName)!.Execute(Measurement!);
+        }
+        else
+        {
+            _logger.LogError("TimeFrameStrategy is null");
+        }
+    }
+
+    private async Task Setdatafields()
+    {
+        Measurement!.RegisteredBy = CurrentUser!.Username;
+        Measurement.TimeFrame = CurrentUser.PreferredTimeFrameStrategyName;
+        Measurement.ConsumptionType = CurrentUser.PreferredConsumptionTypeName;
+    }
+
+    public async Task SubmitMeasurementData()
+    {
+        await SetCurrentUser();
+        if (Measurement != null && CurrentUser != null)
+        {
+            Setdatafields();
+            ExecuteRegistrationStrategy();
+            ExecuteTimeFrameStrategy();
             if (Measurement.Validate(out var validationResults))
             {
                 var json = JsonSerializer.Serialize(Measurement);
-                var success = _writeDataRepository.EnterData(json);
+                var success = await _writeDataRepository.EnterData(json);
                 if (!success)
                 {
-                    _logger.LogError("Failed to send measurement data");
+                    _logger.LogError("Failed to submit measurement data");
+                }
+                else
+                {
+                    _logger.LogInformation("Measurement saved");
                 }
             }
             else
@@ -105,5 +132,15 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, BrugerOpsætning
         }
         Measurement = new Measurement();
         OnStateChange?.Invoke();
+    }
+
+    private async Task SetCurrentUser()
+    {
+        var claimsPrincipal = await _authService.GetCurrentUserAwait();
+        var username = claimsPrincipal.Identity?.Name;
+        if (username != null)
+        {
+            CurrentUser = await _userRepository.GetUserAsync(username);
+        }
     }
 }

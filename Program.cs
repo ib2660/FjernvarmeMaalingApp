@@ -3,21 +3,20 @@ using FjernvarmeMaalingApp.Extensions;
 using FjernvarmeMaalingApp.Services;
 using FjernvarmeMaalingApp.Services.Factories.Interfaces;
 using FjernvarmeMaalingApp.Services.Factories;
-using Microsoft.Extensions.DependencyInjection;
-using FjernvarmeMaalingApp.Services.Converters;
 using FjernvarmeMaalingApp.Services.Interfaces;
 using FjernvarmeMaalingApp.ViewModels;
 using FjernvarmeMaalingApp.ViewModels.Interfaces;
 using Microsoft.AspNetCore.Components.Authorization;
 using FjernvarmeMaalingApp.Models.Interfaces;
 using FjernvarmeMaalingApp.Models.Strategies;
+using FjernvarmeMaalingApp.ViewModels.Strategies;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-builder.Services.AddSingleton<IUserRepository, UserRepositoryService>(); // Tilføj en implementering af IUserRepository.
+builder.Services.AddScoped<IUserRepository, UserRepositoryService>(); // Tilføj en implementering af IUserRepository.
 builder.Services.AddAuthenticationCore(); // Tilføj autentificeringstjenester.
 builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationService>(); // Lad appens autentifikationsservice nedarve fra  AuthenticationStateProvider.
 builder.Services.AddScoped<IAuthenticationService>(sp =>
@@ -25,18 +24,23 @@ builder.Services.AddScoped<IAuthenticationService>(sp =>
 builder.Services.AddScoped<IReadDataRepository, ReadDataRepository>(); // Tilføj en implementering af IReadDataRepository. Kontrakten beskriver kun læseadgang til datalaget. 
 builder.Services.AddScoped<IWriteDataRepository, WriteDataRepository>(); // Tilføj en implementering af IWriteDataRepository. Kontrakten beskriver kun skriveadgang til datalaget. Dette sikrer kompatibilitet med CQRS mønster (command query responsibility segregation).
 
+// Tilføj implementeringer af ITimeFrameStrategy.
+builder.Services.AddScoped<ITimeFrameStrategy, YearlyTimeFrameStrategy>();
+builder.Services.AddScoped<ITimeFrameStrategy, MonthlyTimeFrameStrategy>();
 // Tilføj implementeringer af IConsumptionTypeFactory.
-builder.Services.AddTransient<IConsumptionTypeFactory, OlieForbrugFactory>();
-builder.Services.AddTransient<IConsumptionTypeFactory, GasForbrugFactory>();
-builder.Services.AddTransient<IConsumptionTypeFactory, FjernvarmeForbrugFactory>();
+builder.Services.AddScoped<IConsumptionTypeFactory, OlieForbrugFactory>();
+builder.Services.AddScoped<IConsumptionTypeFactory, GasForbrugFactory>();
+builder.Services.AddScoped<IConsumptionTypeFactory, FjernvarmeForbrugFactory>();
 // Tilføj implementeringer af IRegistrationStrategy.
-builder.Services.AddTransient<IRegistrationStrategy , IntegerRegistrationStrategy>();
-builder.Services.AddTransient<IRegistrationStrategy, MeterReadingRegistrationStrategy>();
+builder.Services.AddScoped<IRegistrationStrategy , IntegerRegistrationStrategy>();
+builder.Services.AddScoped<IRegistrationStrategy, MeterReadingRegistrationStrategy>();
 // Tilføj implementeringer af IMeasurementDisplayStrategy.
-builder.Services.AddTransient<IMeasurementDisplayStrategy, FullDisplayStrategy>();
-builder.Services.AddTransient<IMeasurementDisplayStrategy, ListMonthsDisplayStrategy>();
-builder.Services.AddTransient<IMeasurementDisplayStrategy, OneMonthDisplayStrategy>();
-builder.Services.AddTransient<IMeasurementDisplayStrategy, SameMonthAllYearsDisplayStrategy>();
+builder.Services.AddScoped<IMeasurementDisplayStrategy, FullDisplayStrategy>();
+builder.Services.AddScoped<IMeasurementDisplayStrategy, ListMonthsDisplayStrategy>();
+builder.Services.AddScoped<IMeasurementDisplayStrategy, OneMonthDisplayStrategy>();
+builder.Services.AddScoped<IMeasurementDisplayStrategy, SameMonthAllYearsDisplayStrategy>();
+// Tilføj listen over services
+builder.Services.AddScoped<IServicesRegistry, ServicesRegistry>();
 // Tilføj scoped singletons af ViewModels.
 builder.Services.AddScoped<LoginViewModel>();
 builder.Services.AddScoped<OpretBrugerViewModel>();

@@ -11,7 +11,7 @@ public class ConsumptionTypeJsonConverter : JsonConverter<IConsumptionType>
 
     public ConsumptionTypeJsonConverter(IEnumerable<IConsumptionTypeFactory> factories)
     {
-        _factories = factories.ToDictionary(factory => factory.ConsumptionTypeName, factory => factory);
+        _factories = factories.ToDictionary(factory => factory.Name, factory => factory);
     }
 
     public override IConsumptionType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

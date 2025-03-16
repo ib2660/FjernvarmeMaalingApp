@@ -5,6 +5,6 @@ namespace FjernvarmeMaalingApp.Services.Factories.Interfaces;
 
 public interface IConsumptionTypeFactory
 {
-    string ConsumptionTypeName { get; }
+    string Name { get; }
     IConsumptionType CreateConsumptionType();
 }

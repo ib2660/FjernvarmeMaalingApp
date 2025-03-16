@@ -6,7 +6,7 @@ namespace FjernvarmeMaalingApp.Services.Factories;
 
 public class OlieForbrugFactory : IConsumptionTypeFactory
 {
-    public string ConsumptionTypeName { get; private set; } = "Olieforbrug i liter";
+    public string Name { get; private set; } = "Olieforbrug i liter";
     public IConsumptionType CreateConsumptionType()
     {
         return OlieForbrugLiter.Instance;

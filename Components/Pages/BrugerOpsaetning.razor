@@ -13,8 +13,7 @@ else
        <h4>Opdater Adgangskode</h4>  
        <EditForm Model="ViewModel" OnValidSubmit="UpdatePassword">  
            <DataAnnotationsValidator />  
-           <ValidationSummary />  
-
+           <ValidationSummary />
            <div class="form-group">  
                <label for="newPassword">Ny Adgangskode:</label>  
                <InputText id="newPassword" @bind-Value="ViewModel.NewPassword" class="form-control" />  
@@ -25,7 +24,7 @@ else
            </div>  
            <button type="submit" class="btn btn-primary">Opdater Adgangskode</button>  
        </EditForm>  
-       <p>@ViewModel.ResponseMessage</p>  
+       <p>@ViewModel.ResponseMessages[0]</p>  
    </div>  
 
    <div>  
@@ -33,28 +32,36 @@ else
        <EditForm Model="ViewModel" OnValidSubmit="UpdateUserDetails">  
            <DataAnnotationsValidator />  
            <ValidationSummary />  
-
            <div class="form-group">  
-               <label for="consumptionType">Foretrukken Forbrugstype:</label>  
+               <label for="consumptionType">Foretrukken forbrugstype:</label>  
                <InputSelect id="consumptionType" @bind-Value="ViewModel.SelectedConsumptionType" class="form-control">  
-                   @foreach (var consumptionType in ViewModel.ConsumptionTypeFactories.Keys)  
+                   @foreach (var consumptionTypeName in ViewModel.GetConsumptionTypeNames())  
                    {  
-                       <option value="@consumptionType">@consumptionType</option>  
+                       <option value="@consumptionTypeName">@consumptionTypeName</option>  
                    }  
                </InputSelect>  
            </div>  
            <div class="form-group">  
-               <label for="registrationStrategy">Foretrukken Registreringsstrategi:</label>  
+               <label for="registrationStrategy">Foretrukken registreringsstrategi:</label>  
                <InputSelect id="registrationStrategy" @bind-Value="ViewModel.SelectedRegistrationStrategy" class="form-control">  
-                   @foreach (var registrationStrategy in ViewModel.RegistrationStrategies.Keys)  
+                   @foreach (var registrationStrategyName in ViewModel.GetRegistrationStrategyNames())  
                    {  
-                       <option value="@registrationStrategy">@registrationStrategy</option>  
+                       <option value="@registrationStrategyName">@registrationStrategyName</option>  
                    }  
                </InputSelect>  
-           </div>  
-           <button type="submit" class="btn btn-primary">Opdater Brugeroplysninger</button>  
+           </div>
+            <div class="form-group">
+                <label for="timeFrameStrategy">Foretrukken tidsperiode for registreringer:</label>
+                <InputSelect id="timeFrameStrategy" @bind-Value="ViewModel.SelectedTimeFrameStrategy" class="form-control">
+                    @foreach (var TimeFrameStrategyName in ViewModel.GetTimeFrameStrategyNames())
+                    {
+                        <option value="@TimeFrameStrategyName">@TimeFrameStrategyName</option>
+                    }
+                </InputSelect>
+            </div>
+            <button type="submit" class="btn btn-primary">Opdater Brugeroplysninger</button>  
        </EditForm>  
-       <p>@ViewModel.ResponseMessage</p>  
+       <p>@ViewModel.ResponseMessages[1]</p>  
    </div>  
 }  
 
@@ -62,11 +69,6 @@ else
    protected override async Task OnInitializedAsync()  
    {  
        await ViewModel.InitializeAsync();  
-       if (ViewModel.CurrentUser != null)  
-       {  
-           ViewModel.SelectedConsumptionType = ViewModel.CurrentUser.PreferredConsumptionType?.ConsumptionTypeName ?? string.Empty;  
-           ViewModel.SelectedRegistrationStrategy = ViewModel.CurrentUser.PreferredRegistrationStrategy?.Name ?? string.Empty;  
-       }  
    }  
 
    private async Task UpdatePassword()  
@@ -76,10 +78,6 @@ else
 
    private async Task UpdateUserDetails()  
    {  
-       var success = await ViewModel.UpdateUserDetails();  
-       if (success)  
-       {  
-           ViewModel.ResponseMessage = "Bruger opdateret";  
-       }  
+       await ViewModel.UpdateUserDetailsAsync();
    }  
 }

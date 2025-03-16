@@ -8,41 +8,26 @@ namespace FjernvarmeMaalingApp.Services;
 
 public class UserRepositoryService : IUserRepository
 {
-    private readonly Dictionary<string, IConsumptionTypeFactory> ConsumptionTypeFactories;
-    private readonly ILogger<UserRepositoryService> Logger;
-    private const string FilePath = "users.json";
-    private readonly JsonSerializerOptions _jsonOptions;
-    private List<User> users;
+    private readonly ILogger<UserRepositoryService> _logger;
+    private readonly JsonSerializerOptions _jsonOptions; 
+    private const string _filePath = "users.json";
+    private readonly List<User> users;
 
-    public UserRepositoryService(ILogger<UserRepositoryService> logger, JsonSerializerOptions jsonOptions, IEnumerable<IConsumptionTypeFactory> factories)
+    public UserRepositoryService(ILogger<UserRepositoryService> logger, JsonSerializerOptions jsonOptions)
     {
-        Logger = logger;
+        _logger = logger;
         _jsonOptions = jsonOptions;
-        ConsumptionTypeFactories = factories.ToDictionary(factory => factory.ConsumptionTypeName, factory => factory);
         try
         {
-            string json = File.ReadAllText(FilePath);
+            string json = File.ReadAllText(_filePath);
             users = JsonSerializer.Deserialize<List<User>>(json, _jsonOptions) ?? [];
-            foreach (var user in users)
-            {
-                user.PreferredConsumptionType = GetConsumptionTypeByName(user.PreferredConsumptionTypeName);
-            }
-            Logger.LogInformation("Users loaded from JSON file.");
+            _logger.LogInformation("Users loaded from JSON file.");
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Failed to deserialize users from JSON file.");
+            _logger.LogError(ex, "Failed to deserialize users from JSON file.");
             users = [];
         }
-    }
-
-    private IConsumptionType? GetConsumptionTypeByName(string name)
-    {
-        if (ConsumptionTypeFactories.TryGetValue(name, out var factory))
-        {
-            return factory.CreateConsumptionType();
-        }
-        else return null;
     }
 
     public async Task<User?> GetUserAsync(string username)
@@ -53,16 +38,28 @@ public class UserRepositoryService : IUserRepository
 
     private async Task SaveChangesInUserListAsync()
     {
-        if (!File.Exists(FilePath))
+        if (!File.Exists(_filePath))
         {
-            using (File.Create(FilePath))
+            try
             {
-                Logger.LogInformation("User list file created.");
+                File.Create(_filePath);
+                _logger.LogInformation("User list file created.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create user list file.");
             }
         }
         string json = JsonSerializer.Serialize(users, _jsonOptions);
-        await File.WriteAllTextAsync(FilePath, json);
-        Logger.LogInformation("Changes saved to user list.");
+        try
+        {
+            await File.WriteAllTextAsync(_filePath, json);
+            _logger.LogInformation("Changes saved to user list.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to write changes to user list.");
+        }
     }
 
     public async Task<bool> AddOrUpdateUserAsync(User user)
@@ -73,7 +70,6 @@ public class UserRepositoryService : IUserRepository
             users.Remove(existingUser);
             users.Add(user);
             await SaveChangesInUserListAsync();
-            Logger.LogInformation($"User {user.Username} updated.");
             return true;
         }
         else
@@ -82,12 +78,12 @@ public class UserRepositoryService : IUserRepository
             await SaveChangesInUserListAsync();
             if (users.Contains(user))
             {
-                Logger.LogInformation($"User {user.Username} added to list.");
+                _logger.LogInformation($"User {user.Username} added to list.");
                 return true;
             }
             else
             {
-                Logger.LogError("Failed to add user to list.");
+                _logger.LogError("Failed to add user to list.");
                 return false;
             }
         }

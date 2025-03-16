@@ -2,7 +2,7 @@ using FjernvarmeMaalingApp.Services.Interfaces;
 
 namespace FjernvarmeMaalingApp.Models.Strategies;
 
-public class YearlyStrategy(IWriteDataRepository dataRepository) : ITimeFrameStrategy
+public class YearlyTimeFrameStrategy(IWriteDataRepository dataRepository) : ITimeFrameStrategy
 {
     public string Name => "Årlig aflæsning";
 
@@ -21,11 +21,11 @@ public class YearlyStrategy(IWriteDataRepository dataRepository) : ITimeFrameStr
         {
             Measurement monthlyMeasurement = new()
             {
+                MeasurementDate = measurement.MeasurementDate!.Value.AddMonths(-1 * i),
                 Consumption = totalConsumption * monthlyDistribution[i],
+                RegisteredBy = measurement.RegisteredBy,
+                TimeFrame = "Månedlig aflæsning",
                 ConsumptionType = measurement.ConsumptionType,
-                RegistrationStrategy = measurement.RegistrationStrategy,
-                TimeFrameStrategy = new MonthlyStrategy(_dataRepository),
-                MeasurementDate = measurement.MeasurementDate!.Value.AddMonths(-1 * i)
             };
             _dataRepository.EnterData(System.Text.Json.JsonSerializer.Serialize(monthlyMeasurement));
         }

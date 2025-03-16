@@ -11,64 +11,58 @@
 
 <div>
     <label for="consumptionType">Forbrugstype:</label>
-    <select id="consumptionType" @bind="gemDataViewModel.SelectedConsumptionTypeName">
-        @foreach (var type in gemDataViewModel.BrugerOpsætningViewModel.ConsumptionTypeFactories)
+    <select id="consumptionType" @bind="gemDataViewModel.selectedConsumptionTypeName">
+        @foreach (var consumptionTypeName in gemDataViewModel.GetConsumptionTypeNames())
         {
-            var key = type.Key;
-            <option value="@key">@key</option>
+            <option value="@consumptionTypeName">@consumptionTypeName</option>
         }
     </select>
 </div>
 <div>
     <label for="registrationMethod">Registreringsmetode:</label>
     <select id="registrationMethod" @bind="gemDataViewModel.SelectedRegistrationStrategyName">
-        @foreach (var strategy in gemDataViewModel.BrugerOpsætningViewModel.RegistrationStrategies)
+        @foreach (var registrationStrategyName in gemDataViewModel.GetRegistrationStrategyNames())
         {
-            var key = strategy.Key;
-            <option value="@key">@key</option>
+            <option value="@registrationStrategyName">@registrationStrategyName</option>
         }
     </select>
 </div>
 <div>
     <label for="selectedTimeFrame">Interval:</label>
-    <select id="selectedTimeFrame" @bind="gemDataViewModel.selectedTimeFrame">
-        <option value="Månedlig aflæsning">Månedlig aflæsning</option>
-        <option value="Årlig aflæsning">Årlig aflæsning</option>
+    <select id="selectedTimeFrame" @bind="gemDataViewModel.selectedTimeFrameName">
+        @foreach (var timeFrameStrategyName in gemDataViewModel.GetTimeFrameStrategyNames())
+        {
+            <option value="@timeFrameStrategyName">@timeFrameStrategyName</option>
+        }
     </select>
 </div>
 <div>
     <label for="input">Indtast dato for måling:</label>
     <input id="input" type="date" @bind="gemDataViewModel.Measurement!.MeasurementDate" />
 </div>
-@gemDataViewModel.Measurement.RegistrationStrategy!.GetInputComponent(gemDataViewModel)
+@if (gemDataViewModel.SelectedRegistrationStrategyName != string.Empty)
+{
+    @registrationStrategyComponent
+}
+<button @onclick="SaveData">Gem målingen</button>
 
-
-<button @onclick="UpdateAll">Opdater alle</button>
 
 @code {
-    protected override void OnInitialized()
+    private RenderFragment? registrationStrategyComponent;
+
+    protected override async Task OnInitializedAsync()
     {
-        if (gemDataViewModel.BrugerOpsætningViewModel.ConsumptionTypeFactories.Count == 0)
-        {
-            Console.WriteLine("No consumption type factories found");
-        }
-        if (gemDataViewModel.BrugerOpsætningViewModel.RegistrationStrategies.Count == 0)
-        {
-            Console.WriteLine("No registration strategies found");
-        }
-        else
-        {
-            gemDataViewModel.Measurement = new Measurement();
-            gemDataViewModel.Measurement.SetRegistrationStrategy(gemDataViewModel.BrugerOpsætningViewModel.RegistrationStrategies.First().Value);
-        }
+        gemDataViewModel.OnStateChange += VisComponent;
     }
 
-    private async Task UpdateAll()
+    public void VisComponent()
     {
-        await gemDataViewModel.ConsumptionTypeConfirmedAsync();
-        gemDataViewModel.ConfirmRegistrationStrategy();
-        gemDataViewModel.ConfirmTimeFrameStrategy();
-        gemDataViewModel.ConfirmMeasurementDate();
-        gemDataViewModel.SendMeasurementData();
+        var strategy = gemDataViewModel.GetRegistrationStrategy(gemDataViewModel.SelectedRegistrationStrategyName);
+        registrationStrategyComponent = strategy?.GetInputComponent();
+        StateHasChanged();
+    }
+    private async Task SaveData()
+    {
+        await gemDataViewModel.SubmitMeasurementData();
     }
 }

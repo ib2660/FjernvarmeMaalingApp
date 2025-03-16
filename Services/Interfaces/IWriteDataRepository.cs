@@ -2,6 +2,6 @@
 
 public interface IWriteDataRepository
 {
-    bool EnterData(string json);
-    bool UpdateData(string json);
+    Task <bool> EnterData(string json);
+    Task <bool> UpdateData(string json);
 }

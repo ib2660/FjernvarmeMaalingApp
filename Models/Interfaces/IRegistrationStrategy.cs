@@ -6,7 +6,7 @@ namespace FjernvarmeMaalingApp.Models.Interfaces;
 public interface IRegistrationStrategy
 {
     string Name { get; }
+    double ConsumptionInputValue { get; set; }
+    RenderFragment GetInputComponent();
     void Execute(Measurement measurement);
-    RenderFragment GetInputComponent(GemDataViewModel gemDataViewModel);
-    void OnSubmit(GemDataViewModel gemDataViewModel);
 }
