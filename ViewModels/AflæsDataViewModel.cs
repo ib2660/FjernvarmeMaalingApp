@@ -1,4 +1,5 @@
 ﻿using FjernvarmeMaalingApp.Models;
+using FjernvarmeMaalingApp.Services;
 using FjernvarmeMaalingApp.Services.Interfaces;
 using FjernvarmeMaalingApp.ViewModels.Interfaces;
 using System.Text.Json;
@@ -24,7 +25,6 @@ public class AflæsDataViewModel(IAuthenticationService authenticationService, I
         }
     }
 
-
     public async Task<IEnumerable<Measurement>?> GetMeasurementsAsync()
     {
         var result = new List<Measurement>();
@@ -33,11 +33,12 @@ public class AflæsDataViewModel(IAuthenticationService authenticationService, I
             string json = await _readDataRepository.ReadData(CurrentUser);
             if (json != string.Empty)
             {
-                result = JsonSerializer.Deserialize<List<Measurement>>(json);
+                result = JsonHelper.DeserializeObject<List<Measurement>>(json);
             }
         }
         return result;
     }
+
     public void SetDisplayStrategy(IMeasurementDisplayStrategy measurementDisplayStrategy)
     {
         _measurementDisplayStrategy = measurementDisplayStrategy;

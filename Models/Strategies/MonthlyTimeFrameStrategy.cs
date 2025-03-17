@@ -1,19 +1,28 @@
+using FjernvarmeMaalingApp.Services;
 using FjernvarmeMaalingApp.Services.Interfaces;
 
 namespace FjernvarmeMaalingApp.Models.Strategies;
 
-public class MonthlyTimeFrameStrategy(IWriteDataRepository dataRepository) : ITimeFrameStrategy
+public class MonthlyTimeFrameStrategy(ILogger<MonthlyTimeFrameStrategy> logger) : ITimeFrameStrategy
 {
+    private readonly ILogger<MonthlyTimeFrameStrategy> _logger = logger;
     public string Name => "Månedlig aflæsning";
-
-    private readonly IWriteDataRepository _dataRepository = dataRepository;
-    public void Execute(Measurement measurement)
+    public List<Measurement> Execute(Measurement measurement)
     {
             if (measurement.Consumption == null || measurement.Consumption <= 0)
             {
                 throw new ArgumentException("Consumption must be a positive value.");
             }
         measurement.TimeFrame = Name;
-        _dataRepository.EnterData(System.Text.Json.JsonSerializer.Serialize(measurement));
+        measurement.Validate(out var validationResults);
+        if (validationResults.Count > 0)
+        {
+            foreach (var validationResult in validationResults)
+            {
+                _logger.LogError(validationResult.ErrorMessage);
+            }
+            return [];
+        }
+        return [measurement];
     }
 }

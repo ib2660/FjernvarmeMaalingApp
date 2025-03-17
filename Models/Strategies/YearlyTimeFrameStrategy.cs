@@ -1,14 +1,15 @@
+using FjernvarmeMaalingApp.Services;
 using FjernvarmeMaalingApp.Services.Interfaces;
+using System.Text;
 
 namespace FjernvarmeMaalingApp.Models.Strategies;
 
-public class YearlyTimeFrameStrategy(IWriteDataRepository dataRepository) : ITimeFrameStrategy
+public class YearlyTimeFrameStrategy(ILogger<YearlyTimeFrameStrategy> logger) : ITimeFrameStrategy
 {
+    private readonly ILogger<YearlyTimeFrameStrategy> _logger = logger;
     public string Name => "Årlig aflæsning";
 
-    private readonly IWriteDataRepository _dataRepository = dataRepository;
-
-    public void Execute(Measurement measurement)
+    public List<Measurement> Execute(Measurement measurement)
     {
         if (measurement.Consumption == null || measurement.Consumption <= 0)
         {
@@ -17,9 +18,10 @@ public class YearlyTimeFrameStrategy(IWriteDataRepository dataRepository) : ITim
 
         double[] monthlyDistribution = { 0.13, 0.11, 0.09, 0.04, 0.03, 0.02, 0.03, 0.04, 0.10, 0.13, 0.13, 0.15 }; // omvendt rækkefølge dec => jan
         double totalConsumption = measurement.Consumption.Value;
+        List<Measurement> measurements = [];
         for (int i = 0; i < 12; i++)
         {
-            Measurement monthlyMeasurement = new()
+            Measurement m = new()
             {
                 MeasurementDate = measurement.MeasurementDate!.Value.AddMonths(-1 * i),
                 Consumption = totalConsumption * monthlyDistribution[i],
@@ -27,7 +29,19 @@ public class YearlyTimeFrameStrategy(IWriteDataRepository dataRepository) : ITim
                 TimeFrame = "Månedlig aflæsning",
                 ConsumptionType = measurement.ConsumptionType,
             };
-            _dataRepository.EnterData(System.Text.Json.JsonSerializer.Serialize(monthlyMeasurement));
+            m.Validate(out var validationResults);
+            if (validationResults.Count > 0)
+            {
+                foreach (var validationResult in validationResults)
+                {
+                    _logger.LogError(validationResult.ErrorMessage);
+                }
+            }
+            else
+            {
+                measurements.Add(m);
+            }
         }
+        return measurements;
     }
 }

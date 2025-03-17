@@ -1,5 +1,4 @@
 using FjernvarmeMaalingApp.Components;
-using FjernvarmeMaalingApp.Extensions;
 using FjernvarmeMaalingApp.Services;
 using FjernvarmeMaalingApp.Services.Factories.Interfaces;
 using FjernvarmeMaalingApp.Services.Factories;
@@ -47,9 +46,6 @@ builder.Services.AddScoped<OpretBrugerViewModel>();
 builder.Services.AddScoped<AflæsDataViewModel>();
 builder.Services.AddScoped<GemDataViewModel>();
 builder.Services.AddScoped<BrugerOpsætningViewModel>();
-
-// Tilføj JSON options.
-builder.Services.AddCustomJsonOptions();
 
 builder.Services.AddLogging(config =>
 {

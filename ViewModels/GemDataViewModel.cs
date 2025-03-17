@@ -1,21 +1,16 @@
 ﻿using FjernvarmeMaalingApp.Models;
 using FjernvarmeMaalingApp.Models.Interfaces;
-using FjernvarmeMaalingApp.Services;
 using FjernvarmeMaalingApp.Services.Interfaces;
-using Microsoft.AspNetCore.Components;
-using System.Runtime.ExceptionServices;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace FjernvarmeMaalingApp.ViewModels;
 
 public class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRepository userRepository, IAuthenticationService authService, IServicesRegistry servicesRegistry, IWriteDataRepository writeDataRepository)
 {
     private readonly ILogger<GemDataViewModel> _logger = logger;
-    private readonly IWriteDataRepository _writeDataRepository = writeDataRepository;
-    private readonly IServicesRegistry _servicesRegistry = servicesRegistry;
-    private readonly IAuthenticationService _authService = authService;
     private readonly IUserRepository _userRepository = userRepository;
+    private readonly IAuthenticationService _authService = authService;
+    private readonly IServicesRegistry _servicesRegistry = servicesRegistry;
+    private readonly IWriteDataRepository _writeDataRepository = writeDataRepository;
     public Measurement? Measurement { get; set; } = new Measurement();
     public Action? OnStateChange { get; set; }
     public string selectedTimeFrameName = string.Empty;
@@ -33,7 +28,7 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRepository 
             }
         }
     }
-    public User? CurrentUser {get; private set; }
+    public User? CurrentUser { get; private set; }
     public async Task InitializeAsync()
     {
         await SetCurrentUser();
@@ -41,13 +36,25 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRepository 
         {
             selectedTimeFrameName = CurrentUser.PreferredTimeFrameStrategyName;
             selectedConsumptionTypeName = CurrentUser.PreferredConsumptionTypeName;
-            _selectedRegistrationStrategyName = CurrentUser.PreferredRegistrationStrategyName;          
+            _selectedRegistrationStrategyName = CurrentUser.PreferredRegistrationStrategyName;
         }
         else
         {
             _logger.LogError("CurrentUser is null. Settings not updated.");
         }
     }
+
+    private async Task SetCurrentUser()
+    {
+        CurrentUser = null;
+        System.Security.Claims.ClaimsPrincipal claimsPrincipal = await _authService.GetCurrentUserAwait();
+        string? username = claimsPrincipal.Identity?.Name;
+        if (username != null)
+        {
+            CurrentUser = await _userRepository.GetUserAsync(username);
+        }
+    }
+
     public List<string> GetConsumptionTypeNames()
     {
         return _servicesRegistry.GetAllConsumptionTypeFactories().Select(f => f.Name).ToList();
@@ -62,10 +69,8 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRepository 
     }
     public List<string> GetTimeFrameStrategyNames()
     {
-        // _logger.LogInformation("GetTimeFrameStrategyNames called");
         return _servicesRegistry.GetAllTimeFrameStrategies().Select(s => s.Name).ToList();
     }
-
     private void ExecuteRegistrationStrategy()
     {
         if (_selectedRegistrationStrategyName != string.Empty)
@@ -77,20 +82,19 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRepository 
             _logger.LogError("RegistrationStrategy is null");
         }
     }
-
-    private void ExecuteTimeFrameStrategy()
+    private List<Measurement> ExecuteTimeFrameStrategy()
     {
         if (selectedTimeFrameName != string.Empty)
         {
-            _servicesRegistry.GetTimeFrameStrategy(selectedTimeFrameName)!.Execute(Measurement!);
+            return _servicesRegistry.GetTimeFrameStrategy(selectedTimeFrameName)!.Execute(Measurement!);
         }
         else
         {
             _logger.LogError("TimeFrameStrategy is null");
+            return [];
         }
     }
-
-    private async Task Setdatafields()
+    private void Setdatafields()
     {
         Measurement!.RegisteredBy = CurrentUser!.Username;
         Measurement.TimeFrame = CurrentUser.PreferredTimeFrameStrategyName;
@@ -104,43 +108,23 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRepository 
         {
             Setdatafields();
             ExecuteRegistrationStrategy();
-            ExecuteTimeFrameStrategy();
-            if (Measurement.Validate(out var validationResults))
+            List<Measurement> measurements = ExecuteTimeFrameStrategy();
+            bool success = await _writeDataRepository.EnterData(measurements);
+            if (!success)
             {
-                var json = JsonSerializer.Serialize(Measurement);
-                var success = await _writeDataRepository.EnterData(json);
-                if (!success)
-                {
-                    _logger.LogError("Failed to submit measurement data");
-                }
-                else
-                {
-                    _logger.LogInformation("Measurement saved");
-                }
+                _logger.LogError("Failed to submit measurement data");
             }
             else
             {
-                foreach (var validationResult in validationResults)
-                {
-                    _logger.LogError(validationResult.ErrorMessage);
-                }
+                _logger.LogInformation("Measurement saved");
             }
         }
         else
         {
-            _logger.LogError("Measurement is null");
+
+            _logger.LogError("Measurement or User is null. {CurrentUser}.", CurrentUser != null ? CurrentUser.ToString() : "null");
         }
         Measurement = new Measurement();
         OnStateChange?.Invoke();
-    }
-
-    private async Task SetCurrentUser()
-    {
-        var claimsPrincipal = await _authService.GetCurrentUserAwait();
-        var username = claimsPrincipal.Identity?.Name;
-        if (username != null)
-        {
-            CurrentUser = await _userRepository.GetUserAsync(username);
-        }
     }
 }

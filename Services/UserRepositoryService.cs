@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using FjernvarmeMaalingApp.Models;
-using FjernvarmeMaalingApp.Models.Interfaces;
-using FjernvarmeMaalingApp.Services.Factories.Interfaces;
+﻿using FjernvarmeMaalingApp.Models;
 using FjernvarmeMaalingApp.Services.Interfaces;
 
 namespace FjernvarmeMaalingApp.Services;
@@ -9,18 +6,16 @@ namespace FjernvarmeMaalingApp.Services;
 public class UserRepositoryService : IUserRepository
 {
     private readonly ILogger<UserRepositoryService> _logger;
-    private readonly JsonSerializerOptions _jsonOptions; 
     private const string _filePath = "users.json";
     private readonly List<User> users;
 
-    public UserRepositoryService(ILogger<UserRepositoryService> logger, JsonSerializerOptions jsonOptions)
+    public UserRepositoryService(ILogger<UserRepositoryService> logger)
     {
         _logger = logger;
-        _jsonOptions = jsonOptions;
         try
         {
             string json = File.ReadAllText(_filePath);
-            users = JsonSerializer.Deserialize<List<User>>(json, _jsonOptions) ?? [];
+            users = JsonHelper.DeserializeObject<List<User>>(json) ?? [];
             _logger.LogInformation("Users loaded from JSON file.");
         }
         catch (Exception ex)
@@ -35,7 +30,6 @@ public class UserRepositoryService : IUserRepository
         User? foundUser = users.FirstOrDefault(u => u.Username == username);
         return foundUser;
     }
-
     private async Task SaveChangesInUserListAsync()
     {
         if (!File.Exists(_filePath))
@@ -50,7 +44,7 @@ public class UserRepositoryService : IUserRepository
                 _logger.LogError(ex, "Failed to create user list file.");
             }
         }
-        string json = JsonSerializer.Serialize(users, _jsonOptions);
+        string json = JsonHelper.SerializeObject(users);
         try
         {
             await File.WriteAllTextAsync(_filePath, json);

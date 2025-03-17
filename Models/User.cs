@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 using FjernvarmeMaalingApp.Services.Interfaces;
 
@@ -26,7 +27,7 @@ public class User
     [JsonPropertyName("Preferred Time Frame")]
     public string PreferredTimeFrameStrategyName { get; set; } = string.Empty;
         
-    private User() { }
+    public User() { } // TODO: juster til private, når tests er passed
 
     // Constructor til at deserialize fra JSON
     [JsonConstructor]
@@ -60,7 +61,6 @@ public class User
         }
         return false;
     }
-
     public static void UpdatePassword(string newPassword, User user)
     {
         var salt = GenerateSalt();
@@ -86,5 +86,13 @@ public class User
         using Rfc2898DeriveBytes pbkdf2 = new(password, saltBytes, 10000, HashAlgorithmName.SHA256);
         byte[] hash = pbkdf2.GetBytes(20);
         return Convert.ToBase64String(hash);
+    }
+    public override string ToString()
+    {
+        if (this != null)
+        {
+            return $"User: {Username}";
+        }
+        return "";
     }
 }

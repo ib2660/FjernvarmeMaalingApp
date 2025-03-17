@@ -1,7 +1,6 @@
-﻿namespace FjernvarmeMaalingApp.Services.Interfaces;
-
+﻿using FjernvarmeMaalingApp.Models;
+namespace FjernvarmeMaalingApp.Services.Interfaces;
 public interface IWriteDataRepository
 {
-    Task <bool> EnterData(string json);
-    Task <bool> UpdateData(string json);
+    Task <bool> EnterData(List<Measurement> measurements);
 }

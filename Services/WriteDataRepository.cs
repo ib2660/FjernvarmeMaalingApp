@@ -1,50 +1,61 @@
 using FjernvarmeMaalingApp.Models;
 using FjernvarmeMaalingApp.Services.Interfaces;
-using FjernvarmeMaalingApp.ViewModels;
-using System.Text.Json;
 
 namespace FjernvarmeMaalingApp.Services;
 
-public class WriteDataRepository(ILogger<WriteDataRepository> logger) : IWriteDataRepository
+public class WriteDataRepository(ILogger<WriteDataRepository> logger, IReadDataRepository readDataRepository, IAuthenticationService authenticationService, IUserRepository userRepository) : IWriteDataRepository
 {
     private readonly ILogger<WriteDataRepository> _logger = logger;
-    public async Task<bool> EnterData(string json)
+    private readonly IReadDataRepository _readDataRepository = readDataRepository;
+    private readonly IAuthenticationService _authenticationService = authenticationService;
+    private readonly IUserRepository _userRepository = userRepository;
+    private readonly string _filePath = "C:/temp/data.json";
+    private readonly Dictionary<string, Measurement> _cleaned = [];
+    public async Task<bool> EnterData(List<Measurement> measurements)
     {
-        try
+        string? userName = _authenticationService.GetCurrentUserAwait().Result.Identity?.Name;
+        if (userName == null)
         {
-            await File.AppendAllTextAsync("data.json", json + Environment.NewLine); // demonstration af gemning af data i et repository som kan skiftes ud med en database, en cloud storage service eller andet.
-            return true;
-        }
-        catch (Exception ex)
-        {
-            // Implement logging
-            _logger.LogError(ex, "An error occurred while entering data.");
+            _logger.LogError("User is not authenticated");
             return false;
         }
-    }
-
-    public async Task<bool> UpdateData(string json)
-    {
+        User? user = await _userRepository.GetUserAsync(userName);
+        if (user == null)
+        {
+            _logger.LogError("User not found");
+            return false;
+        }
+        string userData = await _readDataRepository.ReadData(user);
+        string allData = await _readDataRepository.ReadData(null); // TODO: hvordan henter jeg alle data fra samme metode?
+        if (userData == string.Empty)
+        {
+            _logger.LogWarning("No data found for user");
+        }
+        else
+        {
+            measurements.AddRange(JsonHelper.DeserializeObject<List<Measurement>>(userData));
+            measurements.Reverse();
+            foreach (Measurement measurement in measurements)
+            {
+                _cleaned[measurement.MeasurementDate.ToString()!] = measurement;
+            }
+            measurements.Clear();
+            foreach (Measurement measurement in _cleaned.Values)
+            {
+                measurements.Add(measurement);
+            }
+        }
+        string json = JsonHelper.SerializeObject(measurements);
         try
         {
-            var data = await File.ReadAllLinesAsync("data.json");
-            var updatedData = data.Select(line =>
-            {
-                var jsonData = JsonSerializer.Deserialize<Dictionary<string, object>>(line);
-                var newData = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-                if (jsonData["id"].ToString() == newData["id"].ToString()) // TODO: data har ikke et felt der hedder id, så det skal ændres. En kombination af RegisteredBy og MeasurementDate kunne benyttes.
-                {
-                    return json;
-                }
-                return line;
-            }).ToArray();
-
-            await File.WriteAllLinesAsync("data.json", updatedData);
+            using FileStream stream = new(_filePath, FileMode.Create, FileAccess.Write, FileShare.None);
+            using StreamWriter writer = new(stream);
+            await writer.WriteLineAsync(json);
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while updating data.");
+            _logger.LogError("An error occurred while entering data: " + ex.Message);
             return false;
         }
     }
