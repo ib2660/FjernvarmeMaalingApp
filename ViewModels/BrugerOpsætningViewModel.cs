@@ -1,4 +1,5 @@
-﻿using FjernvarmeMaalingApp.Models;
+﻿using FjernvarmeMaalingApp.Data.Interfaces;
+using FjernvarmeMaalingApp.Models;
 using FjernvarmeMaalingApp.Models.Interfaces;
 using FjernvarmeMaalingApp.Services.Factories.Interfaces;
 using FjernvarmeMaalingApp.Services.Interfaces;

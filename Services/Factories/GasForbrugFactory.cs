@@ -6,7 +6,7 @@ namespace FjernvarmeMaalingApp.Services.Factories;
 
 public class GasForbrugFactory : IConsumptionTypeFactory
 {
-    public string Name { get; private set; } = "Gasforbrug i m3";
+    public string Name { get; private set; } = GasForbrugM3.Instance.ConsumptionTypeName;
     public IConsumptionType CreateConsumptionType()
     {
         return GasForbrugM3.Instance;

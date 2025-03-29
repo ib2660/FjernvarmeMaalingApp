@@ -5,7 +5,7 @@ public static class JsonHelper
 {
     private static readonly JsonSerializerOptions _options = new()
     {
-        WriteIndented = true,
+        //WriteIndented = true,
         Converters = { new DateOnlyJsonConverter() }
     };
 

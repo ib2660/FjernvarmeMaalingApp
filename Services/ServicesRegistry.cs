@@ -11,9 +11,9 @@ public class ServicesRegistry : IServicesRegistry
     private readonly Dictionary<string, IMeasurementDisplayStrategy> _measurementDisplayStrategies;
     private readonly Dictionary<string, ITimeFrameStrategy> _timeFrameStrategies;
     private readonly Dictionary<string, IConsumptionTypeFactory> _consumptionTypeFactories;
+    private readonly Dictionary<string, IConsumptionType> _consumptionTypes;
 
     public ServicesRegistry(
-   
         IEnumerable<IRegistrationStrategy> registrationStrategies,
         IEnumerable<IMeasurementDisplayStrategy> measurementDisplayStrategies,
         IEnumerable<ITimeFrameStrategy> timeFrameStrategies,
@@ -23,6 +23,9 @@ public class ServicesRegistry : IServicesRegistry
         _measurementDisplayStrategies = measurementDisplayStrategies.ToDictionary(d => d.DisplayName, d => d);
         _timeFrameStrategies = timeFrameStrategies.ToDictionary(t => t.Name, t => t);
         _consumptionTypeFactories = consumptionTypeFactories.ToDictionary(c => c.Name, c => c);
+        _consumptionTypes = _consumptionTypeFactories.Values
+            .Select(factory => factory.CreateConsumptionType())
+            .ToDictionary(ct => ct.ConsumptionTypeName, ct => ct);
     }
 
     public IEnumerable<IRegistrationStrategy> GetAllRegistrationStrategies()
@@ -47,4 +50,7 @@ public class ServicesRegistry : IServicesRegistry
 
     public IConsumptionTypeFactory? GetConsumptionTypeFactory(string name)
         => _consumptionTypeFactories.TryGetValue(name, out var consumptionTypeFactory) ? consumptionTypeFactory : null;
+
+    public IEnumerable<IConsumptionType> GetAllConsumptionTypes() => _consumptionTypes.Values;
+    public IConsumptionType? GetConsumptionType(string name) => _consumptionTypes.TryGetValue(name, out var consumptionType) ? consumptionType : null;
 }

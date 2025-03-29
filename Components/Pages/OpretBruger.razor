@@ -14,13 +14,13 @@
     <DataAnnotationsValidator />
     <div class="form-group">
         <label for="newUsername">Brugernavn:</label>
-        <InputText id="newUsername" @bind-Value="ViewModel.RegisterModel.Username" class="form-control" placeholder="Brugernavn" @oninput="ViewModel.AdjustComment" />
+        <InputText id="newUsername" @bind-Value="ViewModel.RegisterModel.Username" class="form-control" @oninput="ViewModel.AdjustComment" />
         <ValidationMessage For="@(() => ViewModel.RegisterModel.Username)" />
     </div>
 
     <div class="form-group">
         <label for="newPassword">Adgangskode:</label>
-        <InputText id="newPassword" @bind-Value="ViewModel.RegisterModel.Password" class="form-control" type="password" placeholder="Adgangskode" />
+        <InputText id="newPassword" @bind-Value="ViewModel.RegisterModel.Password" class="form-control" type="password" />
         <ValidationMessage For="@(() => ViewModel.RegisterModel.Password)" />
     </div>
     <button type="submit" class="btn btn-secondary">Opret Bruger</button>

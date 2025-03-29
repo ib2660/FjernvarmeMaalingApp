@@ -1,5 +1,6 @@
 ﻿using FjernvarmeMaalingApp.Models;
 using FjernvarmeMaalingApp.ViewModels.Interfaces;
+using Microsoft.AspNetCore.Components;
 namespace FjernvarmeMaalingApp.ViewModels.Strategies;
 public class OneMonthDisplayStrategy : IMeasurementDisplayStrategy
 {

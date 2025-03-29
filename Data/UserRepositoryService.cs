@@ -1,7 +1,8 @@
-﻿using FjernvarmeMaalingApp.Models;
-using FjernvarmeMaalingApp.Services.Interfaces;
+﻿using FjernvarmeMaalingApp.Data.Interfaces;
+using FjernvarmeMaalingApp.Models;
+using FjernvarmeMaalingApp.Services;
 
-namespace FjernvarmeMaalingApp.Services;
+namespace FjernvarmeMaalingApp.Data;
 
 public class UserRepositoryService : IUserRepository
 {
@@ -58,7 +59,7 @@ public class UserRepositoryService : IUserRepository
 
     public async Task<bool> AddOrUpdateUserAsync(User user)
     {
-        var existingUser = users.FirstOrDefault(u => u.Id == user.Id);
+        var existingUser = users.FirstOrDefault(u => u.Username == user.Username);
         if (existingUser != null)
         {
             users.Remove(existingUser);
@@ -68,6 +69,7 @@ public class UserRepositoryService : IUserRepository
         }
         else
         {
+            user.Id = users.Count + 1;
             users.Add(user);
             await SaveChangesInUserListAsync();
             if (users.Contains(user))

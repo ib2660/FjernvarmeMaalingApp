@@ -11,7 +11,7 @@
 
 <div>
     <label for="consumptionType">Forbrugstype:</label>
-    <select id="consumptionType" @bind="gemDataViewModel.selectedConsumptionTypeName">
+    <select id="consumptionType" @bind="gemDataViewModel.SelectedConsumptionTypeName">
         @foreach (var consumptionTypeName in gemDataViewModel.GetConsumptionTypeNames())
         {
             <option value="@consumptionTypeName">@consumptionTypeName</option>
@@ -29,7 +29,7 @@
 </div>
 <div>
     <label for="selectedTimeFrame">Interval:</label>
-    <select id="selectedTimeFrame" @bind="gemDataViewModel.selectedTimeFrameName">
+    <select id="selectedTimeFrame" @bind="gemDataViewModel.SelectedTimeFrameName">
         @foreach (var timeFrameStrategyName in gemDataViewModel.GetTimeFrameStrategyNames())
         {
             <option value="@timeFrameStrategyName">@timeFrameStrategyName</option>
@@ -46,21 +46,29 @@
 }
 <button @onclick="SaveData">Gem målingen</button>
 
-
 @code {
     private RenderFragment? registrationStrategyComponent;
 
     protected override async Task OnInitializedAsync()
     {
-        gemDataViewModel.OnStateChange += VisComponent;
+        gemDataViewModel.PropertyChanged += (sender, args) =>
+        {
+            if (args.PropertyName == nameof(gemDataViewModel.SelectedRegistrationStrategyName))
+            {
+                VisComponent();
+            }
+        };
+        await gemDataViewModel.InitializeAsync();
     }
 
     public void VisComponent()
     {
+        registrationStrategyComponent = null;
         var strategy = gemDataViewModel.GetRegistrationStrategy(gemDataViewModel.SelectedRegistrationStrategyName);
         registrationStrategyComponent = strategy?.GetInputComponent();
         StateHasChanged();
     }
+
     private async Task SaveData()
     {
         await gemDataViewModel.SubmitMeasurementData();

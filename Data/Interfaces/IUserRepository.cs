@@ -1,6 +1,6 @@
 ﻿using FjernvarmeMaalingApp.Models;
 
-namespace FjernvarmeMaalingApp.Services.Interfaces;
+namespace FjernvarmeMaalingApp.Data.Interfaces;
 
 public interface IUserRepository
 {

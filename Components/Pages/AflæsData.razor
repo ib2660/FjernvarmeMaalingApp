@@ -1,13 +1,53 @@
 ﻿@page "/aflaesning_af_forbrugsdata"
+@using FjernvarmeMaalingApp.Models
+@using FjernvarmeMaalingApp.ViewModels
+@using System.ComponentModel
+@inject AflæsDataViewModel AflæsDataViewModel
 
+<div>
+    <label for="consumptionType">Forbrugstype:</label>
+    <select id="consumptionType" @bind="AflæsDataViewModel.SelectedMeasurementDisplayStrategyName">
+        <option value="" disabled selected>Vælg en type af visning</option>
+        @foreach (var displayType in AflæsDataViewModel.GetMeasurementsDisplayStrategyNames())
+        {
+            <option value="@displayType">@displayType</option>
+        }
+    </select>
+</div>
+@if (measurementStrategyComponent != null)
+{
+    @measurementStrategyComponent;
+}
 @code {
-    //TODO: Implement this page
-    // Vælg visningstype
-    // Al registreret forbrug
-    // Se aflæsninger for en bestemt måned
-    // Se aflæsninger for en række af måneder
-    // Se aflæsninger for et helt år
-    // Se aflæsninger for en række af år
-    // Se aflæsninger for en måned i alle år
-    // Aflæsningstype skal implementeres som et strategy pattern, hvor strategierne er de forskellige visningstyper
+    private RenderFragment measurementStrategyComponent;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AflæsDataViewModel.InitializeAsync();
+        base.OnInitialized();
+        measurementStrategyComponent = builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "measurement-display-container");
+            builder.CloseElement();
+        };
+        AflæsDataViewModel.PropertyChanged += ViewModel_PropertyChanged;
+    }
+
+    private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(AflæsDataViewModel.SelectedMeasurementDisplayStrategyName))
+        {
+            InvokeAsync(() =>
+            {
+                AflæsDataViewModel.ExecuteDisplayStrategy(measurementStrategyComponent);
+                StateHasChanged();
+            });
+        }
+    }
+
+    public void Dispose()
+    {
+        AflæsDataViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+    }
 }

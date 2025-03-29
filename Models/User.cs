@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.Json.Serialization;
-using FjernvarmeMaalingApp.Services.Interfaces;
+using FjernvarmeMaalingApp.Data.Interfaces;
 
 namespace FjernvarmeMaalingApp.Models;
 public class User
@@ -27,7 +27,7 @@ public class User
     [JsonPropertyName("Preferred Time Frame")]
     public string PreferredTimeFrameStrategyName { get; set; } = string.Empty;
         
-    public User() { } // TODO: juster til private, når tests er passed
+    private User() { } 
 
     // Constructor til at deserialize fra JSON
     [JsonConstructor]

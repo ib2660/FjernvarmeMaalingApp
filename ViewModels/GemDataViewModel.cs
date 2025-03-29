@@ -1,10 +1,12 @@
-﻿using FjernvarmeMaalingApp.Models;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using FjernvarmeMaalingApp.Data.Interfaces;
+using FjernvarmeMaalingApp.Models;
 using FjernvarmeMaalingApp.Models.Interfaces;
 using FjernvarmeMaalingApp.Services.Interfaces;
 
 namespace FjernvarmeMaalingApp.ViewModels;
 
-public class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRepository userRepository, IAuthenticationService authService, IServicesRegistry servicesRegistry, IWriteDataRepository writeDataRepository)
+public partial class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRepository userRepository, IAuthenticationService authService, IServicesRegistry servicesRegistry, IWriteDataRepository writeDataRepository) : ObservableObject
 {
     private readonly ILogger<GemDataViewModel> _logger = logger;
     private readonly IUserRepository _userRepository = userRepository;
@@ -13,30 +15,21 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRepository 
     private readonly IWriteDataRepository _writeDataRepository = writeDataRepository;
     public Measurement? Measurement { get; set; } = new Measurement();
     public Action? OnStateChange { get; set; }
+    [ObservableProperty] 
     public string selectedTimeFrameName = string.Empty;
+    [ObservableProperty]
     public string selectedConsumptionTypeName = string.Empty;
+    [ObservableProperty] 
     private string _selectedRegistrationStrategyName = string.Empty;
-    public string SelectedRegistrationStrategyName
-    {
-        get => _selectedRegistrationStrategyName;
-        set
-        {
-            if (_selectedRegistrationStrategyName != value)
-            {
-                _selectedRegistrationStrategyName = value;
-                OnStateChange?.Invoke();
-            }
-        }
-    }
     public User? CurrentUser { get; private set; }
     public async Task InitializeAsync()
     {
         await SetCurrentUser();
         if (CurrentUser != null)
         {
-            selectedTimeFrameName = CurrentUser.PreferredTimeFrameStrategyName;
-            selectedConsumptionTypeName = CurrentUser.PreferredConsumptionTypeName;
-            _selectedRegistrationStrategyName = CurrentUser.PreferredRegistrationStrategyName;
+            SelectedTimeFrameName = CurrentUser.PreferredTimeFrameStrategyName;
+            SelectedConsumptionTypeName = CurrentUser.PreferredConsumptionTypeName;
+            SelectedRegistrationStrategyName = CurrentUser.PreferredRegistrationStrategyName;
         }
         else
         {
@@ -97,8 +90,8 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRepository 
     private void Setdatafields()
     {
         Measurement!.RegisteredBy = CurrentUser!.Username;
-        Measurement.TimeFrame = CurrentUser.PreferredTimeFrameStrategyName;
-        Measurement.ConsumptionType = CurrentUser.PreferredConsumptionTypeName;
+        Measurement.TimeFrame = SelectedTimeFrameName;
+        Measurement.ConsumptionType = SelectedConsumptionTypeName;
     }
 
     public async Task SubmitMeasurementData()
@@ -109,20 +102,24 @@ public class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRepository 
             Setdatafields();
             ExecuteRegistrationStrategy();
             List<Measurement> measurements = ExecuteTimeFrameStrategy();
-            bool success = await _writeDataRepository.EnterData(measurements);
-            if (!success)
+            foreach (Measurement m in measurements)
             {
-                _logger.LogError("Failed to submit measurement data");
+                bool success = await _writeDataRepository.EnterData(m);
+                if (!success)
+                {
+                    _logger.LogError("Failed to submit measurement data");
+                }
+                else
+                {
+                    _logger.LogInformation("Measurement saved");
+                }
             }
-            else
-            {
-                _logger.LogInformation("Measurement saved");
-            }
+            
         }
         else
         {
 
-            _logger.LogError("Measurement or User is null. {CurrentUser}.", CurrentUser != null ? CurrentUser.ToString() : "null");
+            _logger.LogError("Measurement and/or User is null. User: {CurrentUser}.", CurrentUser != null ? CurrentUser.ToString() : "null");
         }
         Measurement = new Measurement();
         OnStateChange?.Invoke();

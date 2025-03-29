@@ -13,4 +13,6 @@ public interface IServicesRegistry
     IMeasurementDisplayStrategy? GetMeasurementDisplayStrategy(string name);
     IEnumerable<IConsumptionTypeFactory> GetAllConsumptionTypeFactories();
     IConsumptionTypeFactory? GetConsumptionTypeFactory(string name);
+    IEnumerable<IConsumptionType> GetAllConsumptionTypes();
+    IConsumptionType? GetConsumptionType(string name);
 }

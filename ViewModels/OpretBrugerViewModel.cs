@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using FjernvarmeMaalingApp.Models;
 using FjernvarmeMaalingApp.Services.Interfaces;
+using FjernvarmeMaalingApp.Data.Interfaces;
 
 namespace FjernvarmeMaalingApp.ViewModels;
 public class OpretBrugerViewModel

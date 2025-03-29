@@ -1,5 +1,6 @@
 ﻿using FjernvarmeMaalingApp.Models;
 using FjernvarmeMaalingApp.ViewModels.Interfaces;
+using System.Globalization;
 
 namespace FjernvarmeMaalingApp.ViewModels.Strategies;
 public class ListMonthsDisplayStrategy : IMeasurementDisplayStrategy
@@ -7,6 +8,9 @@ public class ListMonthsDisplayStrategy : IMeasurementDisplayStrategy
     public string DisplayName { get; } = "Vis liste af måneder";
     public void Execute(IEnumerable<Measurement> measurements)
     {
-        // Implementer logik for at vise en liste af måneder
+        var months = measurements
+            .Where(m => m.MeasurementDate.HasValue)
+            .Select(m => m.MeasurementDate!.Value.ToString("MMMM", CultureInfo.InvariantCulture))
+            .Distinct();
     }
 }
