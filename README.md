@@ -1,39 +1,39 @@
-# FjernvarmeMaalingApp# FjernvarmeMaalingApp
+# FjernvarmeMaalingApp
 
 ## Dansk
 
 ### Beskrivelse
-FjernvarmeMaalingApp er en Blazor Server webapplikation udviklet som en del af et eksamensprojekt i Avanceret Programmering på Akademi-niveau. Applikationen er designet til at håndtere brugernes målinger af energiforbrug for Jullerup Færgeby Fjernvarmeværk.
+FjernvarmeMaalingApp er en Blazor Server webapplikation udviklet som en del af et eksamensprojekt i Avanceret Programmering pÃ¥ Akademi-niveau. Applikationen er designet til at hÃ¥ndtere brugernes mÃ¥linger af energiforbrug for Jullerup FÃ¦rgeby FjernvarmevÃ¦rk.
 
-### Formål
-Formålet med applikationen er at give brugerne mulighed for at registrere og se deres energiforbrug på en brugervenlig måde. Applikationen er bygget med fokus på realtidsopdateringer og en klar adskillelse af ansvarsområder gennem anvendelse af MVVM (Model-View-ViewModel) designmønsteret.
+### FormÃ¥l
+FormÃ¥let med applikationen er at give brugerne mulighed for at registrere og se deres energiforbrug pÃ¥ en brugervenlig mÃ¥de. Applikationen er bygget med fokus pÃ¥ realtidsopdateringer og en klar adskillelse af ansvarsomrÃ¥der gennem anvendelse af MVVM (Model-View-ViewModel) designmÃ¸nsteret.
 
 ### Overordnet Arkitektur
-- **View Lag**: Indeholder Blazor-komponenter og sider, der udgør brugergrænsefladen.
-- **ViewModel Lag**: Håndterer applikationens logik og data binding mellem view og viewmodel.
+- **View Lag**: Indeholder Blazor-komponenter og sider, der udgÃ¸r brugergrÃ¦nsefladen.
+- **ViewModel Lag**: HÃ¥ndterer applikationens logik og data binding mellem view og viewmodel.
 - **Model Lag**: Indeholder dataobjekter og forretningslogik.
 - **Service Lag**: Indeholder services, der benyttes af viewmodellaget.
 - **Data Lag**: Indeholder modeller for repositories og administrerer logik til interaktion med datakilder.
 
-### Designmønstre
-- **Strategi Mønster**: Anvendt til at håndtere forskellige måder at vise og registrere brugermålinger på.
-- **Registry Mønster**: Centraliserer adgangen til services gennem Blazor Dependency Injection.
-- **Factory Mønster**: Returnerer forskellige typer af forbrugsenheder.
-- **Singleton Mønster**: Sikrer, at visse klasser kun har en enkelt instans i applikationen.
-- **CQRS Mønster**: Adskiller læse- og skriveoperationer i forskellige interfaces.
+### DesignmÃ¸nstre
+- **Strategi MÃ¸nster**: Anvendt til at hÃ¥ndtere forskellige mÃ¥der at vise og registrere brugermÃ¥linger pÃ¥.
+- **Registry MÃ¸nster**: Centraliserer adgangen til services gennem Blazor Dependency Injection.
+- **Factory MÃ¸nster**: Returnerer forskellige typer af forbrugsenheder.
+- **Singleton MÃ¸nster**: Sikrer, at visse klasser kun har en enkelt instans i applikationen.
+- **CQRS MÃ¸nster**: Adskiller lÃ¦se- og skriveoperationer i forskellige interfaces.
 
 ### Sikkerhed
-- **AuthenticationStateProvider**: Håndterer brugeridentitet og sikrer, at data kun er tilgængelige for autoriserede brugere.
-- **Cryptography**: Anvendes til sikker håndtering af brugeradgangskoder gennem kryptering og hashing.
+- **AuthenticationStateProvider**: HÃ¥ndterer brugeridentitet og sikrer, at data kun er tilgÃ¦ngelige for autoriserede brugere.
+- **Cryptography**: Anvendes til sikker hÃ¥ndtering af brugeradgangskoder gennem kryptering og hashing.
 
 ### Videre Udvikling
-- **Sikring af Data**: Flytning af dataregistrering til en database server for højere sikkerhed.
+- **Sikring af Data**: Flytning af dataregistrering til en database server for hÃ¸jere sikkerhed.
 - **Oprettelse af API**: Mulighed for at brugere kan hente og uploade data gennem et API.
 
 ## English
 
 ### Description
-FjernvarmeMaalingApp is a Blazor Server web application developed as part of an exam project in Advanced Programming at the Academy level. The application is designed to manage users' energy consumption measurements for Jullerup Færgeby District Heating Plant.
+FjernvarmeMaalingApp is a Blazor Server web application developed as part of an exam project in Advanced Programming at the Academy level. The application is designed to manage users' energy consumption measurements for Jullerup FÃ¦rgeby District Heating Plant.
 
 ### Purpose
 The purpose of the application is to provide users with a user-friendly way to register and view their energy consumption. The application is built with a focus on real-time updates and a clear separation of concerns through the use of the MVVM (Model-View-ViewModel) design pattern.
