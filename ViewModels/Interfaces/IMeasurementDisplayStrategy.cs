@@ -5,5 +5,6 @@ namespace FjernvarmeMaalingApp.ViewModels.Interfaces;
 public interface IMeasurementDisplayStrategy
 {
     string DisplayName { get; }
-    void Execute(IEnumerable<Measurement> measurements, RenderFragment renderFragment);
+    RenderFragment Execute(IEnumerable<Measurement> measurements, EventCallback<IEnumerable<Measurement>> eventCallback);
+    void Reset();
 }

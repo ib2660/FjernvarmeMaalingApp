@@ -3,6 +3,7 @@
 @using FjernvarmeMaalingApp.ViewModels
 @using System.ComponentModel
 @inject AflæsDataViewModel AflæsDataViewModel
+@inject ILogger<AflæsData> Logger
 
 <div>
     <label for="consumptionType">Forbrugstype:</label>
@@ -16,7 +17,7 @@
 </div>
 @if (measurementStrategyComponent != null)
 {
-    @measurementStrategyComponent;
+    @measurementStrategyComponent
 }
 @code {
     private RenderFragment measurementStrategyComponent;
@@ -24,13 +25,8 @@
     protected override async Task OnInitializedAsync()
     {
         await AflæsDataViewModel.InitializeAsync();
+        measurementStrategyComponent = builder => { };
         base.OnInitialized();
-        measurementStrategyComponent = builder =>
-        {
-            builder.OpenElement(0, "div");
-            builder.AddAttribute(1, "class", "measurement-display-container");
-            builder.CloseElement();
-        };
         AflæsDataViewModel.PropertyChanged += ViewModel_PropertyChanged;
     }
 
@@ -38,16 +34,39 @@
     {
         if (e.PropertyName == nameof(AflæsDataViewModel.SelectedMeasurementDisplayStrategyName))
         {
-            InvokeAsync(() =>
-            {
-                AflæsDataViewModel.ExecuteDisplayStrategy(measurementStrategyComponent);
-                StateHasChanged();
-            });
+            UpdateMeasurementStrategyComponent();
         }
+    }
+
+    private void UpdateMeasurementStrategyComponent()
+    {
+        var eventCallback = EventCallback.Factory.Create<IEnumerable<Measurement>>(this, OnEventTriggered);
+
+        measurementStrategyComponent = builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "measurement-display-container");
+
+            var renderFragment = AflæsDataViewModel.ExecuteDisplayStrategy(eventCallback);
+            if (renderFragment != null)
+            {
+                builder.AddContent(2, renderFragment);
+            }
+            builder.CloseElement();
+        };
+        StateHasChanged();
+        Logger.LogInformation("SelectedMeasurementDisplayStrategyName changed. {SelectedMeasurementDisplayStrategyName}", AflæsDataViewModel.SelectedMeasurementDisplayStrategyName);
+    }
+
+    private void OnEventTriggered(IEnumerable<Measurement> measurements)
+    {
+        Logger.LogInformation("Event triggered from DisplayStrategyComponent.");
+        UpdateMeasurementStrategyComponent();
     }
 
     public void Dispose()
     {
+        Logger.LogInformation("Disposing AflæsData component.");
         AflæsDataViewModel.PropertyChanged -= ViewModel_PropertyChanged;
     }
 }

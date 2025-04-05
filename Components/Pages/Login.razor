@@ -16,13 +16,13 @@ else
         <DataAnnotationsValidator />
         <div class="form-group">
             <label for="username">Brugernavn:</label>
-            <InputText id="username" @bind-Value="ViewModel.LoginModel.Username" class="form-control" placeholder="Brugernavn" />
+            <InputText id="username" @bind-Value="ViewModel.LoginModel.Username" class="form-control" />
             <ValidationMessage For="@(() => ViewModel.LoginModel.Username)" />
         </div>
 
         <div class="form-group">
             <label for="password">Adgangskode:</label>
-            <InputText id="password" @bind-Value="ViewModel.LoginModel.Password" class="form-control" type="password" placeholder="Adgangskode" />
+            <InputText id="password" @bind-Value="ViewModel.LoginModel.Password" class="form-control" type="password" />
             <ValidationMessage For="@(() => ViewModel.LoginModel.Password)" />
         </div>
 

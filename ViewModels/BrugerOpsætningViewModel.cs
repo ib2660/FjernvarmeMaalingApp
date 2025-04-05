@@ -18,6 +18,7 @@ public class BrugerOpsætningViewModel
     private readonly IUserRepository _userRepository;
     private readonly IAuthenticationService _authService;
     private readonly IServicesRegistry _servicesRegistry;
+
     public BrugerOpsætningViewModel(IUserRepository userRepository, IAuthenticationService authService, IServicesRegistry servicesRegistry)
     {
         _userRepository = userRepository;
@@ -27,7 +28,7 @@ public class BrugerOpsætningViewModel
 
     public async Task InitializeAsync()
     {
-        System.Security.Claims.ClaimsPrincipal claimsPrincipal = await _authService.GetCurrentUserAwait();
+        System.Security.Claims.ClaimsPrincipal claimsPrincipal = await _authService.GetCurrentUserAsync();
         string? username = claimsPrincipal.Identity?.Name;
         if (username != null)
         {
@@ -56,14 +57,17 @@ public class BrugerOpsætningViewModel
     {
         return _servicesRegistry.GetAllConsumptionTypeFactories().Select(f => f.Name).ToList();
     }
+
     public List<string> GetRegistrationStrategyNames()
     {
         return _servicesRegistry.GetAllRegistrationStrategies().Select(s => s.Name).ToList();
     }
+
     public List<string> GetTimeFrameStrategyNames()
     {
         return _servicesRegistry.GetAllTimeFrameStrategies().Select(s => s.Name).ToList();
     }
+
     public async Task<bool> UpdateUserDetailsAsync()
     {
         ResponseMessages[1] = string.Empty;
@@ -72,6 +76,7 @@ public class BrugerOpsætningViewModel
             ResponseMessages[1] = "Bruger opdatering fejlede. Ingen bruger registreret.";
             return false;
         }
+
         if (!string.IsNullOrEmpty(SelectedConsumptionType))
         {
             IConsumptionTypeFactory? consumptionTypeFactory = _servicesRegistry.GetConsumptionTypeFactory(SelectedConsumptionType);
@@ -82,7 +87,7 @@ public class BrugerOpsætningViewModel
             }
             else
             {
-                ResponseMessages[1] = "Bruger opdatering fejlede på forbrugstype.";
+                ResponseMessages[1] = "Bruger opdatering fejlede vedrørende forbrugstype.";
                 return false;
             }
         }
@@ -97,7 +102,7 @@ public class BrugerOpsætningViewModel
             }
             else
             {
-                ResponseMessages[1] = "Bruger opdatering fejlede på registreringsstrategi.";
+                ResponseMessages[1] = "Bruger opdatering fejlede vedrørende registreringsstrategi.";
                 return false;
             }
         }
@@ -107,12 +112,12 @@ public class BrugerOpsætningViewModel
             ITimeFrameStrategy? timeFrameStrategyInstance = _servicesRegistry.GetTimeFrameStrategy(SelectedTimeFrameStrategy);
             if (timeFrameStrategyInstance != null)
             {
-                CurrentUser.PreferredConsumptionTypeName = SelectedConsumptionType;
+                CurrentUser.PreferredTimeFrameStrategyName = SelectedTimeFrameStrategy;
                 ResponseMessages[1] = "Bruger opdatering gennemført.";
             }
             else
             {
-                ResponseMessages[1] = "Bruger opdatering fejlede på tidsrammestrategi.";
+                ResponseMessages[1] = "Bruger opdatering fejlede vedrørende tidsrammestrategi.";
                 return false;
             }
         }

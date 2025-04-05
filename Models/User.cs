@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 using FjernvarmeMaalingApp.Data.Interfaces;
 
@@ -19,13 +18,13 @@ public class User
     public required string Salt { get; set; }
     
     [JsonPropertyName("Preferred Consumption Type Name")]
-    public string PreferredConsumptionTypeName { get; set; } = string.Empty;
+    public string PreferredConsumptionTypeName { get; set; }
 
     [JsonPropertyName("Preferred Registration Strategy Name")]
-    public string PreferredRegistrationStrategyName { get; set; } = string.Empty;
+    public string PreferredRegistrationStrategyName { get; set; }
 
     [JsonPropertyName("Preferred Time Frame")]
-    public string PreferredTimeFrameStrategyName { get; set; } = string.Empty;
+    public string PreferredTimeFrameStrategyName { get; set; }
         
     private User() { } 
 

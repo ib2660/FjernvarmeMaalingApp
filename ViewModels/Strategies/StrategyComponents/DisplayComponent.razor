@@ -1,0 +1,36 @@
+﻿@using FjernvarmeMaalingApp.Models
+@namespace FjernvarmeMaalingApp.ViewModels.Strategies.StrategyComponents
+@inherits ComponentBase
+
+@if (Measurements != null && Measurements.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    @foreach (var prop in typeof(Measurement).GetProperties())
+                    {
+                        <th>@prop.Name</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Measurements)
+                {
+                    <tr>
+                        @foreach (var prop in typeof(Measurement).GetProperties())
+                        {
+                            <td>@prop.GetValue(item)</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public IEnumerable<Measurement> Measurements { get; set; }
+    }

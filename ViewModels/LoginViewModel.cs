@@ -23,7 +23,7 @@ public class LoginViewModel
 
     public async Task InitializeAsync()
     {
-        CurrentUser = await _authProvider.GetCurrentUserAwait();
+        CurrentUser = await _authProvider.GetCurrentUserAsync();
         LoginModel.Username = string.Empty;
         LoginModel.Password = string.Empty;
     }
@@ -34,7 +34,7 @@ public class LoginViewModel
         bool isValid = await _authProvider.ValidateLoginAsync(LoginModel.Username!, LoginModel.Password!);
         if (isValid)
         {
-            CurrentUser = await _authProvider.GetCurrentUserAwait();
+            CurrentUser = await _authProvider.GetCurrentUserAsync();
             _navigationManager.NavigateTo("/");
         }
         else
@@ -48,6 +48,6 @@ public class LoginViewModel
     public async Task LogOutAsync()
     {
         _authProvider.MarkUserAsLoggedOutAsync();
-        CurrentUser = await _authProvider.GetCurrentUserAwait();
+        CurrentUser = await _authProvider.GetCurrentUserAsync();
     }
 }

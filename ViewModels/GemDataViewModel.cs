@@ -40,7 +40,7 @@ public partial class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRep
     private async Task SetCurrentUser()
     {
         CurrentUser = null;
-        System.Security.Claims.ClaimsPrincipal claimsPrincipal = await _authService.GetCurrentUserAwait();
+        System.Security.Claims.ClaimsPrincipal claimsPrincipal = await _authService.GetCurrentUserAsync();
         string? username = claimsPrincipal.Identity?.Name;
         if (username != null)
         {
@@ -100,7 +100,7 @@ public partial class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRep
         if (Measurement != null && CurrentUser != null)
         {
             Setdatafields();
-            ExecuteRegistrationStrategy();
+            // ExecuteRegistrationStrategy();
             List<Measurement> measurements = ExecuteTimeFrameStrategy();
             foreach (Measurement m in measurements)
             {

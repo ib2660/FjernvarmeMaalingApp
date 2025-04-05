@@ -14,7 +14,7 @@ public class WriteDataRepository(ILogger<WriteDataRepository> logger, IAuthentic
     private readonly string _filePath = "C:/temp/data.json";
         public async Task<bool> EnterData(Measurement measurement)
     {
-        ClaimsPrincipal currentUser = await _authenticationService.GetCurrentUserAwait();
+        ClaimsPrincipal currentUser = await _authenticationService.GetCurrentUserAsync();
         string? userName = currentUser.Identity?.Name;
         if (userName == null)
         {

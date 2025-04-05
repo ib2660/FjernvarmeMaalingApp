@@ -4,7 +4,7 @@ namespace FjernvarmeMaalingApp.Services.Interfaces;
 public interface IAuthenticationService
 {
     Task<bool> ValidateLoginAsync(string username, string password);
-    Task<ClaimsPrincipal> GetCurrentUserAwait();
+    Task<ClaimsPrincipal> GetCurrentUserAsync();
     Task MarkUserAsAuthenticatedAsync(string username);
     Task MarkUserAsLoggedOutAsync();
 }

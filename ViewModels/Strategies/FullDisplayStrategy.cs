@@ -1,12 +1,25 @@
 using FjernvarmeMaalingApp.Models;
 using FjernvarmeMaalingApp.ViewModels.Interfaces;
 using Microsoft.AspNetCore.Components;
+using FjernvarmeMaalingApp.ViewModels.Strategies.StrategyComponents;
+
 namespace FjernvarmeMaalingApp.ViewModels.Strategies;
 public class FullDisplayStrategy : IMeasurementDisplayStrategy
 {
     public string DisplayName { get; } = "Vis alle målinger";
-    public void Execute(IEnumerable<Measurement> measurements)
+    public RenderFragment Execute(IEnumerable<Measurement> measurements, EventCallback<IEnumerable<Measurement>> eventCallback)
     {
-        // Nothing done as all items must be shown
+        RenderFragment renderFragment = builder =>
+        {
+            builder.OpenComponent<DisplayComponent>(0);
+            builder.AddAttribute(1, "Measurements", measurements);
+            builder.CloseComponent();
+        };
+        return renderFragment;
+    }
+
+    public void Reset()
+    {
+        
     }
 }

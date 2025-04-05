@@ -18,25 +18,29 @@ public partial class AflæsDataViewModel(IAuthenticationService authenticationSe
     private readonly ILogger<AflæsDataViewModel> _logger = logger;
     private readonly IServicesRegistry _servicesRegistry = servicesRegistry;
     private List<Measurement> measurements = [];
+    private IMeasurementDisplayStrategy? _currentMeasurementDisplayStrategy;
+
     [ObservableProperty]
-    public string selectedMeasurementDisplayStrategyName = string.Empty;
+    private string selectedMeasurementDisplayStrategyName = string.Empty;
+
+    partial void OnSelectedMeasurementDisplayStrategyNameChanged(string value)
+    {
+        ResetCurrentStrategy();
+    }
+
     public User? CurrentUser { get; private set; }
     public async Task InitializeAsync()
     {
-        var claimsPrincipal = await _authenticationService.GetCurrentUserAwait();
+        var claimsPrincipal = await _authenticationService.GetCurrentUserAsync();
         var username = claimsPrincipal.Identity?.Name;
-        if (CurrentUser == null || username == null) 
-        {
-            _logger.LogError("User not logged in.");
-            return;
-        }
-        if (username != CurrentUser.Username)
+        if (username != null && username != CurrentUser?.Username)
         {
             CurrentUser = await _userRepository.GetUserAsync(username);
         }
-        if (SelectedMeasurementDisplayStrategyName == string.Empty)
+        if (CurrentUser == null || username == null)
         {
-            SelectedMeasurementDisplayStrategyName = GetMeasurementsDisplayStrategyNames().First();
+            _logger.LogError("User not logged in.");
+            return;
         }
         if (measurements.Count == 0)
         {
@@ -82,13 +86,20 @@ public partial class AflæsDataViewModel(IAuthenticationService authenticationSe
         }
         return result;
     }
-    public void ExecuteDisplayStrategy(RenderFragment renderFragment)
+    public RenderFragment? ExecuteDisplayStrategy(EventCallback<IEnumerable<Measurement>> eventCallback)
     {
-        if (SelectedMeasurementDisplayStrategyName == null || measurements.Count == 0)
-        {
-            return;
-        }
+        if (SelectedMeasurementDisplayStrategyName == null || measurements.Count == 0) return null;
         var strategy = _servicesRegistry.GetMeasurementDisplayStrategy(SelectedMeasurementDisplayStrategyName);
-        strategy!.Execute(measurements, renderFragment);
+        if (strategy == null) return null;
+        _currentMeasurementDisplayStrategy = strategy;
+        return strategy!.Execute(measurements, eventCallback);
+    }
+
+    private void ResetCurrentStrategy()
+    {
+        if (_currentMeasurementDisplayStrategy == null) return;
+        _currentMeasurementDisplayStrategy.Reset();
     }
 }
+
+

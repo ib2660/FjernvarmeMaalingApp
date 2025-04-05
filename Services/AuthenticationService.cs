@@ -27,7 +27,7 @@ public class AuthenticationService(IUserRepository userRepository) : Authenticat
         return false;
     }
 
-    public async Task<ClaimsPrincipal> GetCurrentUserAwait()
+    public async Task<ClaimsPrincipal> GetCurrentUserAsync()
     {
         return _currentUser;
     }
@@ -41,7 +41,6 @@ public class AuthenticationService(IUserRepository userRepository) : Authenticat
 
         _currentUser = new ClaimsPrincipal(identity);
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_currentUser)));
-        return;
     }
 
     public async Task MarkUserAsLoggedOutAsync()
