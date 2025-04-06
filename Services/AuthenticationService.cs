@@ -19,7 +19,7 @@ public class AuthenticationService(IUserRepository userRepository) : Authenticat
     public async Task<bool> ValidateLoginAsync(string usernameToValidate, string passwordToValidate)
     {
         var storedUser = await _userRepository.GetUserAsync(usernameToValidate);
-        if (storedUser != null && storedUser.PasswordHash == User.CheckPassword(passwordToValidate, storedUser.Salt))
+        if (storedUser != null && storedUser.CheckPassword(passwordToValidate))
         {
             await MarkUserAsAuthenticatedAsync(storedUser.Username);
             return true;

@@ -1,9 +1,10 @@
 ﻿using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 using FjernvarmeMaalingApp.Data.Interfaces;
+using FjernvarmeMaalingApp.Models.Interfaces;
 
 namespace FjernvarmeMaalingApp.Models;
-public class User
+public class User : IUser
 {
     [JsonPropertyName("Id")]
     public int Id { get; set; }
@@ -28,7 +29,6 @@ public class User
         
     private User() { } 
 
-    // Constructor til at deserialize fra JSON
     [JsonConstructor]
     public User(int id, string username, string passwordHash, string salt, string preferredConsumptionTypeName, string preferredRegistrationStrategyName, string preferredTimeFrameStrategyName)
     {
@@ -41,35 +41,48 @@ public class User
         PreferredTimeFrameStrategyName = preferredTimeFrameStrategyName;
     }
 
-    public static async Task<bool> CreateUserAsync(string username, string password, IUserRepository UserRepository, string preferredConsumptionTypeName, string preferredRegistrationStrategyName, string preferredTimeFrameStrategyName)
+    public interface IUserFactory
     {
-        var salt = GenerateSalt();
-        var passwordHash = HashPassword(password, salt);
-        var user = new User
-        {
-            Username = username,
-            PasswordHash = passwordHash,
-            Salt = salt,
-            PreferredConsumptionTypeName = preferredConsumptionTypeName,
-            PreferredRegistrationStrategyName = preferredRegistrationStrategyName,
-            PreferredTimeFrameStrategyName = preferredTimeFrameStrategyName
-        };
-        if (await UserRepository.AddOrUpdateUserAsync(user))
-        {
-            return true;
-        }
-        return false;
-    }
-    public static void UpdatePassword(string newPassword, User user)
-    {
-        var salt = GenerateSalt();
-        user.PasswordHash = HashPassword(newPassword, salt);
-        user.Salt = salt;
+        Task<IUser> CreateUserAsync(string username, string password, string preferredConsumptionTypeName, string preferredRegistrationStrategyName, string preferredTimeFrameStrategyName);
     }
 
-    public static string CheckPassword(string password, string userSalt)
+    public class UserFactory : IUserFactory
     {
-        return HashPassword(password, userSalt);
+        private readonly IUserRepository _userRepository;
+        public UserFactory(IUserRepository userRepository)
+        {
+            _userRepository = userRepository;
+        }
+
+        public async Task<IUser> CreateUserAsync(string username, string password, string preferredConsumptionTypeName, string preferredRegistrationStrategyName, string preferredTimeFrameStrategyName)
+        {
+            User newUser = new()
+            {
+                Username = username,
+                PasswordHash = string.Empty,
+                Salt = GenerateSalt(),
+                PreferredConsumptionTypeName = preferredConsumptionTypeName,
+                PreferredRegistrationStrategyName = preferredRegistrationStrategyName,
+                PreferredTimeFrameStrategyName = preferredTimeFrameStrategyName
+            };
+            newUser.PasswordHash = newUser.HashPassword(password);
+            if (await _userRepository.AddOrUpdateUserAsync(newUser))
+            {
+                return newUser;
+            }
+            throw new Exception("User creation failed.");
+        }
+    }
+
+    public void UpdatePassword(string newPassword)
+    {
+        Salt = GenerateSalt();
+        PasswordHash = HashPassword(newPassword);
+    }
+
+    public bool CheckPassword(string password)
+    {
+        return Salt == HashPassword(password);
     }
 
     private static string GenerateSalt()
@@ -79,10 +92,10 @@ public class User
         return Convert.ToBase64String(salt);
     }
 
-    private static string HashPassword(string password, string salt)
+    private string HashPassword(string newPassword)
     {
-        byte[] saltBytes = Convert.FromBase64String(salt);
-        using Rfc2898DeriveBytes pbkdf2 = new(password, saltBytes, 10000, HashAlgorithmName.SHA256);
+        byte[] saltBytes = Convert.FromBase64String(Salt);
+        using Rfc2898DeriveBytes pbkdf2 = new(newPassword, saltBytes, 10000, HashAlgorithmName.SHA256);
         byte[] hash = pbkdf2.GetBytes(20);
         return Convert.ToBase64String(hash);
     }

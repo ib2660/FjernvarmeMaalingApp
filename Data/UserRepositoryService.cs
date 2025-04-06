@@ -1,5 +1,5 @@
 ﻿using FjernvarmeMaalingApp.Data.Interfaces;
-using FjernvarmeMaalingApp.Models;
+using FjernvarmeMaalingApp.Models.Interfaces;
 using FjernvarmeMaalingApp.Services;
 
 namespace FjernvarmeMaalingApp.Data;
@@ -8,7 +8,7 @@ public class UserRepositoryService : IUserRepository
 {
     private readonly ILogger<UserRepositoryService> _logger;
     private const string _filePath = "users.json";
-    private readonly List<User> users;
+    private readonly List<IUser> users;
 
     public UserRepositoryService(ILogger<UserRepositoryService> logger)
     {
@@ -16,7 +16,7 @@ public class UserRepositoryService : IUserRepository
         try
         {
             string json = File.ReadAllText(_filePath);
-            users = JsonHelper.DeserializeObject<List<User>>(json) ?? [];
+            users = JsonHelper.DeserializeObject<List<IUser>>(json) ?? [];
             _logger.LogInformation("Users loaded from JSON file.");
         }
         catch (Exception ex)
@@ -26,12 +26,12 @@ public class UserRepositoryService : IUserRepository
         }
     }
 
-    public async Task<User?> GetUserAsync(string username)
+    public async Task<IUser?> GetUserAsync(string username)
     {
-        User? foundUser = users.FirstOrDefault(u => u.Username == username);
+        IUser? foundUser = users.FirstOrDefault(u => u.Username == username);
         return foundUser;
     }
-    private async Task SaveChangesInUserListAsync()
+    private async Task<bool> SaveChangesInUserListAsync()
     {
         if (!File.Exists(_filePath))
         {
@@ -43,6 +43,7 @@ public class UserRepositoryService : IUserRepository
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to create user list file.");
+                return false;
             }
         }
         string json = JsonHelper.SerializeObject(users);
@@ -50,29 +51,30 @@ public class UserRepositoryService : IUserRepository
         {
             await File.WriteAllTextAsync(_filePath, json);
             _logger.LogInformation("Changes saved to user list.");
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to write changes to user list.");
+            return false;
         }
     }
 
-    public async Task<bool> AddOrUpdateUserAsync(User user)
+    public async Task<bool> AddOrUpdateUserAsync(IUser user)
     {
         var existingUser = users.FirstOrDefault(u => u.Username == user.Username);
         if (existingUser != null)
         {
             users.Remove(existingUser);
             users.Add(user);
-            await SaveChangesInUserListAsync();
-            return true;
+            return (await SaveChangesInUserListAsync());
         }
         else
         {
             user.Id = users.Count + 1;
             users.Add(user);
-            await SaveChangesInUserListAsync();
-            if (users.Contains(user))
+            var result = await SaveChangesInUserListAsync();
+            if (result && users.Contains(user))
             {
                 _logger.LogInformation($"User {user.Username} added to list.");
                 return true;

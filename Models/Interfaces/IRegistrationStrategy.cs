@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using FjernvarmeMaalingApp.ViewModels;
 
 namespace FjernvarmeMaalingApp.Models.Interfaces;
 

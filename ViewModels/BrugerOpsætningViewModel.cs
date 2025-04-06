@@ -1,4 +1,5 @@
-﻿using FjernvarmeMaalingApp.Data.Interfaces;
+﻿using System.Security.Claims;
+using FjernvarmeMaalingApp.Data.Interfaces;
 using FjernvarmeMaalingApp.Models;
 using FjernvarmeMaalingApp.Models.Interfaces;
 using FjernvarmeMaalingApp.Services.Factories.Interfaces;
@@ -8,7 +9,7 @@ namespace FjernvarmeMaalingApp.ViewModels;
 
 public class BrugerOpsætningViewModel
 {
-    public User? CurrentUser { get; private set; }
+    public IUser? CurrentUser { get; private set; }
     public string NewPassword { get; set; } = string.Empty;
     public string ConfirmPassword { get; set; } = string.Empty;
     public List<string> ResponseMessages { get; set; } = [string.Empty, string.Empty];
@@ -28,8 +29,8 @@ public class BrugerOpsætningViewModel
 
     public async Task InitializeAsync()
     {
-        System.Security.Claims.ClaimsPrincipal claimsPrincipal = await _authService.GetCurrentUserAsync();
-        string? username = claimsPrincipal.Identity?.Name;
+        var claimsPrincipal = await _authService.GetCurrentUserAsync();
+        var username = claimsPrincipal.Identity?.Name;
         if (username != null)
         {
             CurrentUser = await _userRepository.GetUserAsync(username);
@@ -47,10 +48,14 @@ public class BrugerOpsætningViewModel
 
         if (!string.IsNullOrEmpty(NewPassword))
         {
-            User.UpdatePassword(NewPassword, CurrentUser!);
+            CurrentUser?.UpdatePassword(NewPassword);
         }
-        _ = await _userRepository.AddOrUpdateUserAsync(CurrentUser!);
-        ResponseMessages[0] = "Password blev opdateret.";
+        if (await _userRepository.AddOrUpdateUserAsync((User)CurrentUser!))
+        {
+            ResponseMessages[0] = "Password blev opdateret.";
+            return;
+        }
+        ResponseMessages[0] = "Fejl ved opdatering af password.";
     }
 
     public List<string> GetConsumptionTypeNames()
@@ -79,7 +84,7 @@ public class BrugerOpsætningViewModel
 
         if (!string.IsNullOrEmpty(SelectedConsumptionType))
         {
-            IConsumptionTypeFactory? consumptionTypeFactory = _servicesRegistry.GetConsumptionTypeFactory(SelectedConsumptionType);
+            var consumptionTypeFactory = _servicesRegistry.GetConsumptionTypeFactory(SelectedConsumptionType);
             if (consumptionTypeFactory != null)
             {
                 CurrentUser.PreferredConsumptionTypeName = SelectedConsumptionType;
@@ -94,7 +99,7 @@ public class BrugerOpsætningViewModel
 
         if (!string.IsNullOrEmpty(SelectedRegistrationStrategy))
         {
-            IRegistrationStrategy? registrationStrategyInstance = _servicesRegistry.GetRegistrationStrategy(SelectedRegistrationStrategy);
+            var registrationStrategyInstance = _servicesRegistry.GetRegistrationStrategy(SelectedRegistrationStrategy);
             if (registrationStrategyInstance != null)
             {
                 CurrentUser.PreferredRegistrationStrategyName = SelectedRegistrationStrategy;
@@ -109,7 +114,7 @@ public class BrugerOpsætningViewModel
 
         if (!string.IsNullOrEmpty(SelectedTimeFrameStrategy))
         {
-            ITimeFrameStrategy? timeFrameStrategyInstance = _servicesRegistry.GetTimeFrameStrategy(SelectedTimeFrameStrategy);
+            var timeFrameStrategyInstance = _servicesRegistry.GetTimeFrameStrategy(SelectedTimeFrameStrategy);
             if (timeFrameStrategyInstance != null)
             {
                 CurrentUser.PreferredTimeFrameStrategyName = SelectedTimeFrameStrategy;
@@ -121,6 +126,6 @@ public class BrugerOpsætningViewModel
                 return false;
             }
         }
-        return await _userRepository.AddOrUpdateUserAsync(CurrentUser!);
-    }            
+        return await _userRepository.AddOrUpdateUserAsync((User)CurrentUser!);
+    }
 }

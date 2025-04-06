@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Components;
 using FjernvarmeMaalingApp.Models;
 using FjernvarmeMaalingApp.Services.Interfaces;
 using FjernvarmeMaalingApp.Data.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using static FjernvarmeMaalingApp.Models.User;
 
 namespace FjernvarmeMaalingApp.ViewModels;
 public class OpretBrugerViewModel
@@ -21,17 +23,18 @@ public class OpretBrugerViewModel
 
     public async Task HandleRegister()
     {
+        UserFactory userFactory = new(_userRepository); // TODO: læg denne i Program.cs som Singleton. Den skal ikke skrive nogen data, så den behøver ikke at være scoped.
         RegisterModel.Response = string.Empty;
         string c = _servicesRegistry.GetAllConsumptionTypeFactories().First().Name;
         string r = _servicesRegistry.GetAllRegistrationStrategies().First().Name;
         string t = _servicesRegistry.GetAllTimeFrameStrategies().First().Name;
-        if (!await User.CreateUserAsync(RegisterModel.Username!, RegisterModel.Password!, _userRepository, c, r, t))
+        try
         {
-            RegisterModel.Response = "Brugeren blev ikke oprettet.";
-        }
-        else
-        {
+            var newUser = await userFactory.CreateUserAsync(RegisterModel.Username!, RegisterModel.Password!, c, r, t);
             RegisterModel.Response = "Brugeren er oprettet";
+        }
+        catch (Exception ex) {
+            RegisterModel.Response = "Brugeren blev ikke oprettet.";
         }
         RegisterModel.ResetInstance();
     }

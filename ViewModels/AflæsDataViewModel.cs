@@ -35,7 +35,7 @@ public partial class AflæsDataViewModel(IAuthenticationService authenticationSe
         var username = claimsPrincipal.Identity?.Name;
         if (username != null && username != CurrentUser?.Username)
         {
-            CurrentUser = await _userRepository.GetUserAsync(username);
+            CurrentUser = (User?) await _userRepository.GetUserAsync(username);
         }
         if (CurrentUser == null || username == null)
         {

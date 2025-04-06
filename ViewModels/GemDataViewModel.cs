@@ -3,6 +3,7 @@ using FjernvarmeMaalingApp.Data.Interfaces;
 using FjernvarmeMaalingApp.Models;
 using FjernvarmeMaalingApp.Models.Interfaces;
 using FjernvarmeMaalingApp.Services.Interfaces;
+using FjernvarmeMaalingApp.ViewModels.Interfaces;
 
 namespace FjernvarmeMaalingApp.ViewModels;
 
@@ -21,7 +22,7 @@ public partial class GemDataViewModel(ILogger<GemDataViewModel> logger, IUserRep
     public string selectedConsumptionTypeName = string.Empty;
     [ObservableProperty] 
     private string _selectedRegistrationStrategyName = string.Empty;
-    public User? CurrentUser { get; private set; }
+    public IUser? CurrentUser { get; private set; }
     public async Task InitializeAsync()
     {
         await SetCurrentUser();

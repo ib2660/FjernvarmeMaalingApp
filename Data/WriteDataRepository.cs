@@ -21,7 +21,7 @@ public class WriteDataRepository(ILogger<WriteDataRepository> logger, IAuthentic
             _logger.LogError("User is not authenticated");
             return false;
         }
-        User? user = await _userRepository.GetUserAsync(userName);
+        User? user = (User?) await _userRepository.GetUserAsync(userName);
         if (user == null)
         {
             _logger.LogError("User not found");
