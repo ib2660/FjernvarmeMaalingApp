@@ -1,4 +1,4 @@
-# FjernvarmeMaalingApp# FjernvarmeMaalingApp
+# FjernvarmeMaalingApp
 
 ## Dansk
 
