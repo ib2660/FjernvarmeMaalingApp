@@ -20,7 +20,7 @@ public class BrugerOpsætningViewModel
     private readonly IAuthenticationService _authService;
     private readonly IServicesRegistry _servicesRegistry;
 
-    public BrugerOpsætningViewModel(IUserRepository userRepository, IAuthenticationService authService, IServicesRegistry servicesRegistry)
+    public BrugerOpsætningViewModel(IUserRepository userRepository, IAuthenticationService authService, IServicesRegistry servicesRegistry, IUserFactory userFactory)
     {
         _userRepository = userRepository;
         _authService = authService;

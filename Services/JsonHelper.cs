@@ -1,5 +1,7 @@
-﻿using System;
+﻿using FjernvarmeMaalingApp.Models;
+using FjernvarmeMaalingApp.Models.Interfaces;
 using System.Text.Json;
+
 namespace FjernvarmeMaalingApp.Services;
 public static class JsonHelper
 {
@@ -17,6 +19,16 @@ public static class JsonHelper
     public static T DeserializeObject<T>(string json)
     {
         var result = JsonSerializer.Deserialize<T>(json, _options);
+        if (result == null)
+        {
+            throw new JsonException("Deserialization failed.");
+        }
+        return result;
+    }
+
+    public static IUser DeserializeUser(string json)
+    {
+        var result = JsonSerializer.Deserialize<User>(json, _options);
         if (result == null)
         {
             throw new JsonException("Deserialization failed.");

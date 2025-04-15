@@ -11,6 +11,8 @@ using FjernvarmeMaalingApp.ViewModels;
 using FjernvarmeMaalingApp.ViewModels.Interfaces;
 using FjernvarmeMaalingApp.ViewModels.Strategies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
+using static FjernvarmeMaalingApp.Models.User;
 
 namespace FjernvarmeMaalingApp.Configuration;
 public static class ServiceRegistration
@@ -18,7 +20,6 @@ public static class ServiceRegistration
     // Tilføj en implementering af IUserRepository.
     // Tilføj en implementering af IReadDataRepository. Kontrakten beskriver kun læseadgang til datalaget. 
     // Tilføj en implementering af IWriteDataRepository. Kontrakten beskriver kun skriveadgang til datalaget. Dette sikrer kompatibilitet med CQRS mønster (command query responsibility segregation).
-
     public static void RegisterRepositories(IServiceCollection services)
     {
         _ = services.AddScoped<IUserRepository, UserRepositoryService>();
@@ -60,6 +61,7 @@ public static class ServiceRegistration
         _ = services.AddScoped<IConsumptionTypeFactory, GasForbrugFactory>();
         _ = services.AddScoped<IConsumptionTypeFactory, FjernvarmeForbrugFactory>();
         _ = services.AddScoped<IServicesRegistry, ServicesRegistry>();
+        _ = services.AddScoped<IUserFactory, UserFactory>();
     }
 
     // Tilføj scoped singletons af ViewModels.

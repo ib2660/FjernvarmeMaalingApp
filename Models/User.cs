@@ -41,11 +41,6 @@ public class User : IUser
         PreferredTimeFrameStrategyName = preferredTimeFrameStrategyName;
     }
 
-    public interface IUserFactory
-    {
-        Task<IUser> CreateUserAsync(string username, string password, string preferredConsumptionTypeName, string preferredRegistrationStrategyName, string preferredTimeFrameStrategyName);
-    }
-
     public class UserFactory : IUserFactory
     {
         private readonly IUserRepository _userRepository;
@@ -82,7 +77,7 @@ public class User : IUser
 
     public bool CheckPassword(string password)
     {
-        return Salt == HashPassword(password);
+        return PasswordHash == HashPassword(password);
     }
 
     private static string GenerateSalt()

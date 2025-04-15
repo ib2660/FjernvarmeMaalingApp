@@ -9,7 +9,9 @@ using Microsoft.AspNetCore.Components;
 using System.Text.Json;
 
 namespace FjernvarmeMaalingApp.ViewModels;
-
+/// <summary>
+/// Primary constructor
+/// </summary>
 public partial class AflæsDataViewModel(IAuthenticationService authenticationService, IUserRepository userRepository, IReadDataRepository readDataRepository, ILogger<AflæsDataViewModel> logger, IServicesRegistry servicesRegistry) : ObservableObject
 {
     private readonly IAuthenticationService _authenticationService = authenticationService;
